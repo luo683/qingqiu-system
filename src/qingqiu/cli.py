@@ -3,6 +3,7 @@
 S1.1: --version / -v / config show（占位）
 S1.2: llm test <provider>
 S1.3: config show（真工作）+ config path
+S1.4: 集成日志系统（setup_logging + logger）
 
 后续切片：task / chat / graph 等
 """
@@ -14,7 +15,10 @@ import asyncio
 import sys
 from pathlib import Path
 
+from loguru import logger as loguru_logger
+
 from qingqiu import __version__
+from qingqiu.observability import get_logger, setup_logging
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -86,18 +90,23 @@ async def cmd_llm_test_async(args: argparse.Namespace) -> int:
     from qingqiu.llm import Message, get_provider
     from qingqiu.llm.exceptions import LLMError, ProviderInitError
 
+    log = get_logger("qingqiu.cli.llm_test")
     provider_name = args.provider
+    log.info(f"开始测试 provider={provider_name}")
     print(f"[test] 初始化 {provider_name} provider ...")
 
     try:
         provider = get_provider(provider_name)
     except ProviderInitError as e:
+        log.error(f"provider 初始化失败: {provider_name}, error={e}")
         print(f"[FAIL] 初始化失败：{e}", file=sys.stderr)
         return 1
     except Exception as e:
+        log.error(f"provider 初始化异常: {provider_name}, type={type(e).__name__}, error={e}")
         print(f"[FAIL] 未知错误：{e}", file=sys.stderr)
         return 1
 
+    log.info(f"provider 初始化 OK: {provider_name}, default_model={provider.default_model}")
     print(f"[test] 初始化 OK (default_model={provider.default_model})")
     print(f"[test] 发送测试 prompt ...")
 
@@ -108,12 +117,17 @@ async def cmd_llm_test_async(args: argparse.Namespace) -> int:
             max_tokens=50,
         )
     except LLMError as e:
+        log.error(f"LLM 调用失败: {provider_name}, error={e}")
         print(f"[FAIL] LLM 调用失败：{e}", file=sys.stderr)
         return 1
     except Exception as e:
+        log.error(f"LLM 调用异常: {provider_name}, type={type(e).__name__}, error={e}")
         print(f"[FAIL] 调用异常：{type(e).__name__}: {e}", file=sys.stderr)
         return 1
 
+    log.info(f"LLM 调用 OK: {provider_name}, model={response.model}, "
+             f"input={response.usage.get('input_tokens', 0)}, "
+             f"output={response.usage.get('output_tokens', 0)}")
     print(f"[OK] {provider_name} 响应：")
     print(f"  content: {response.content!r}")
     print(f"  model:   {response.model}")
@@ -130,27 +144,39 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 
-    if args.version:
-        return cmd_version(args)
+    # S1.4: 集成日志系统
+    log_level = "DEBUG" if getattr(args, "verbose", False) else "INFO"
+    setup_logging(level=log_level)
+    log = get_logger("qingqiu.cli")
 
-    if args.command == "config":
-        if args.subcommand == "show":
-            return cmd_config_show(args)
-        if args.subcommand == "path":
-            return cmd_config_path(args)
-        # 无子命令输出 config 帮助
-        parser.parse_args([args.command, "--help"])
+    log.info(f"qingqiu {__version__} invoked with argv={argv or sys.argv[1:]}")
 
-    if args.command == "llm" and args.llm_subcommand == "test":
-        return cmd_llm_test(args)
+    try:
+        if args.version:
+            return cmd_version(args)
 
-    if args.verbose:
-        print(f"[verbose] qingqiu {__version__}")
-        print(f"[verbose] Python {sys.version.split()[0]}")
-        print(f"[verbose] Platform: {sys.platform}")
+        if args.command == "config":
+            if args.subcommand == "show":
+                return cmd_config_show(args)
+            if args.subcommand == "path":
+                return cmd_config_path(args)
+            # 无子命令输出 config 帮助
+            parser.parse_args([args.command, "--help"])
 
-    parser.print_help()
-    return 0
+        if args.command == "llm" and args.llm_subcommand == "test":
+            return cmd_llm_test(args)
+
+        if args.verbose:
+            print(f"[verbose] qingqiu {__version__}")
+            print(f"[verbose] Python {sys.version.split()[0]}")
+            print(f"[verbose] Platform: {sys.platform}")
+
+        parser.print_help()
+        return 0
+    except Exception as e:
+        log.error(f"unhandled exception: {type(e).__name__}: {e}")
+        log.exception("stacktrace")
+        return 1
 
 
 if __name__ == "__main__":

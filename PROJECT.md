@@ -1,7 +1,7 @@
 # PROJECT · 清秋项目状态
 
-> **状态：** v0.3.0 · 立项完成 · 进入 M1
-> **最后更新：** 2026-07-05 19:55
+> **状态：** v0.3.0 · 立项完成 · M1 推进中（S1.1-S1.4 完成）
+> **最后更新：** 2026-07-05 21:40
 > **作者：** Mavis
 > **本文件性质：** 项目"快照"。**状态变化、决策、下一步**都写在这里。每次 session 开始 / 结束时更新。
 
@@ -9,7 +9,7 @@
 
 ## 1. 一句话状态
 
-**清秋 v0.3.0 立项完成**：8 份核心文档齐备 + 5 份 references/ 前端标准骨架齐备 + 目录迁移完成 + **GitHub 仓库已确认**。**M1（骨架 + LLM 抽象层）尚未开始**。
+**清秋 v0.3.0 立项完成**：8 份核心文档齐备 + 5 份 references/ 前端标准骨架齐备 + 目录迁移完成 + **GitHub 仓库已确认** + **M1 推进中**：S1.1 / S1.2 / S1.3 / S1.4 完成（4/5），下一个：S1.5（Memory 四层空壳，1 天）。
 
 ---
 
@@ -19,11 +19,11 @@
 |------|------|
 | **PRD** | v0.2.2 已冻结 |
 | **架构** | v0.3.0 · 五层架构 + 48 切片路径清晰 |
-| **代码** | ~1500 行（src/qingqiu/ + llm/ 子模块） |
-| **测试** | 50 个 pytest 全通过 |
-| **文档** | 11 份核心 + 5 份 references/ 标准 = 16 份 |
-| **里程碑** | M0 ✅ / **M1 进行中（S1.1+S1.2+S1.3 完成）** / M2-M10 pending |
-| **当前切片** | ✅ **S1.3 真跑落地完成** · 下一个：S1.4（日志系统，0.5 天） |
+| **代码** | ~2100 行（src/qingqiu/ + llm/ + config/ + observability/ 子模块） |
+| **测试** | **87 个 pytest 全通过**（6 个 S1.4 新增） |
+| **文档** | 11 份核心 + 5 份 references/ 标准 + 4 份真跑证据 = 20 份 |
+| **里程碑** | M0 ✅ / **M1 进行中（4/5 切片）** / M2-M10 pending |
+| **当前切片** | ✅ **S1.4 真跑落地完成** · 下一个：S1.5（Memory 四层空壳，1 天） |
 | **仓库** | ✅ GitHub URL 已确认：`https://github.com/luo683/qingqiu-system` |
 
 ---
@@ -37,19 +37,22 @@
 | **立项（M0）** | 11 份核心文档 + 5 份 references/ 标准 |
 | 文档体系 | README / PRD / PRD-archived / ARCH / PROJECT / TECH-STACK / DESIGN / IMPLEMENTATION-PLAN / NON-FUNCTIONAL / AGENTS / CHANGELOG |
 | references/ | README / naming / components / styling / testing |
-| 目录迁移 | jarvis-system/ → qingqiu-system/ |
+| 目录迁移 | jarvis-system/ → qingqiu-system/（旧目录已移回收站） |
 | 改名 | 贾维斯 → 清秋（产品名全栈替换） |
 | 接入规划 | Hermes 吸收重塑 / Obsidian 接入 / 知识图谱 / 自我成长 |
 | 切片规划 | 48 个 slice 全部定义 |
-| **GitHub 仓库** | URL 确认 + 4 个 commit（S1.1 + 文档 + lockfile）已就位待 push |
+| **GitHub 仓库** | URL 确认 + 13 个 commit 已就位待 push |
 | **S1.1** | 项目骨架（pyproject + CLI + 5 测试通过） |
-| **S1.2** | LLM 抽象层（4 provider + router + 45 测试通过） |
+| **S1.2** | LLM 抽象层（4 provider + router + 45 测试通过 + CustomProvider 真打 MiniMax API PASS） |
+| **S1.3** | 配置系统（YAML + env 覆盖 + 1s 热重载 + 31 测试 + 4 项真跑全 PASS） |
+| **S1.4** | 日志系统（loguru + 滚动 + 错误分流 + CLI 集成 + 6 测试 + 5 命令真跑 PASS） |
 
 ### 3.2 进行中 🔄
 
 | 任务 | 状态 |
 |------|------|
 | **Git 首次推送** | 待用户执行（push 命令需要 PAT 输入） |
+| **S1.5 Memory** | 待开始（4 层空壳 + SQLite + Markdown 索引） |
 
 ### 3.3 待办 📋
 
@@ -137,6 +140,7 @@ Obsidian 接入 + 知识图谱 UI + 自我成长 + 持续打磨。
 | D-010 | 2026-07-05 | **S1.2 真跑落地完成**：LLM 抽象层就位 | 4 provider + router + 工厂；50/50 mock 测试通过 + **CustomProvider 真打 MiniMax API PASS** |
 | D-011 | 2026-07-05 | **验收纪律立规则**：每个 slice 必须真实端到端跑通，不只 mock | 创建 VERIFICATION.md 文档；S1.2 是首个未满足此规则的切片（待补真跑） |
 | D-012 | 2026-07-05 | **S1.3 真跑落地完成**：配置系统就位 | YAML 加载 + env 覆盖 + 1s 热重载 + 损坏兜底；81/81 mock 测试 + 4 项真跑全 PASS |
+| D-013 | 2026-07-05 | **S1.4 真跑落地完成**：日志系统就位 | loguru 双 handler（控制台 + 文件）+ 100MB 滚动 + 7 天保留 + 错误日志独立分流；87/87 mock 测试 + 5 命令真跑全 PASS |
 
 ---
 

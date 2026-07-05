@@ -44,6 +44,18 @@
   - mock 测试 PASS：pytest 81/81（S1.1 + S1.2 + S1.3）
   - **🆕 真跑落地 PASS**：4 项验证全过（CLI / 文件加载 / 优先级 / 热重载 1s 内）。证据：[docs/verification/S1.3_config.log.md](./docs/verification/S1.3_config.log.md)
   - 见 [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) S1.3
+- **S1.4 · 日志系统**（2026-07-05）
+  - `src/qingqiu/observability/logger.py`：`setup_logging()` + `get_logger()`（loguru 封装）
+  - 控制台（stderr，简洁版）+ 文件（详细版，含位置 + 行号）双 handler
+  - 文件滚动：单文件 100MB 触发 rotation / 7 天自动清理 / 多进程安全（enqueue）
+  - 独立错误日志：`qingqiu.error.log` 只过滤 ERROR 级（方便定位失败）
+  - 错误诊断：`backtrace=True` + `diagnose=True`（含异常链 + 变量值）
+  - CLI 集成：`main()` 顶部调 `setup_logging()`，`-v` 切到 DEBUG 级
+  - `qingqiu llm test` 子命令全路径加 `logger.info/error` 输出
+  - 6 个 pytest 测试（mock）覆盖 setup / write / 错误分流 / handler 移除 / 级别过滤
+  - **🆕 真跑落地 PASS**：跑 5 个混合命令（version / llm test ollama / llm test openai / config show / -v），main log 1.59KB / 19 行；error log 0.37KB / 2 行（仅 ERROR）。证据：[docs/verification/S1.4_logging.log.md](./docs/verification/S1.4_logging.log.md)
+  - mock 测试 PASS：pytest 87/87（S1.1 + S1.2 + S1.3 + S1.4）
+  - 见 [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) S1.4
 
 ---
 

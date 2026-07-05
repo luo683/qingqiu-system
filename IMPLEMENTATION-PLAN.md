@@ -70,10 +70,10 @@ S{M}.{N}  v0.1  短描述
 
 | 切片 | 范围 | 验收 | 估时 |
 |------|------|------|------|
-| **S1.1** | pyproject.toml / 目录结构 / config.yaml / CLI 骨架 | `qingqiu --version` 跑通 | 1d |
-| **S1.2** | LLM 抽象层（openai/anthropic/ollama/custom） + retry + 流式 | 跑通 4 个 provider 测试 | 3d |
-| **S1.3** | 配置系统（YAML + 优先级 + 热重载） | 改 config 1s 内生效 | 1d |
-| **S1.4** | 日志系统（loguru + 滚动） | 跑出错的命令，日志写到正确位置 | 0.5d |
+| **S1.1** ✅ | pyproject.toml / 目录结构 / config.yaml / CLI 骨架 | `qingqiu --version` 跑通 | 1d |
+| **S1.2** ✅ | LLM 抽象层（openai/anthropic/ollama/custom） + retry + 流式 | 跑通 4 个 provider 测试 | 3d |
+| **S1.3** ✅ | 配置系统（YAML + 优先级 + 热重载） | 改 config 1s 内生效 | 1d |
+| **S1.4** ✅ | 日志系统（loguru + 滚动） | 跑出错的命令，日志写到正确位置 | 0.5d |
 | **S1.5** | Memory 四层空壳（接口 + SQLite 表） | set/get 一条 fact 一致 | 1d |
 
 ### M2 · CLI + Router（6 slice · 2-3 周）
@@ -191,7 +191,7 @@ M1 → M2 → M3 → M4
 ## 5. 切片状态板（开发时维护）
 
 ```
-M1  [ ] S1.1 [ ] S1.2 [ ] S1.3 [ ] S1.4 [ ] S1.5
+M1  [x] S1.1 [x] S1.2 [x] S1.3 [x] S1.4 [ ] S1.5
 M2  [ ] S2.1 [ ] S2.2 [ ] S2.3 [ ] S2.4 [ ] S2.5 [ ] S2.6
 M3  [ ] S3.1 [ ] S3.2 [ ] S3.3 [ ] S3.4 [ ] S3.5
 M4  [ ] S4.1 [ ] S4.2 [ ] S4.3 [ ] S4.4
