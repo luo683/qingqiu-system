@@ -16,6 +16,15 @@
   - `tests/test_cli.py` 5 个 pytest 测试覆盖 CLI
   - 验收 PASS：uv sync 装依赖成功 + pytest 5/5
   - 见 [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) S1.1
+- **S1.2 · LLM 抽象层**（2026-07-05）
+  - 4 个 provider：`OpenAIProvider` / `AnthropicProvider` / `OllamaProvider` / `CustomProvider`
+  - `LLMProvider` Protocol + `Message` / `LLMResponse` 数据结构
+  - `LLMRouter` 按角色分派（如 `router: cheap` / `planner: strong` / `memory: local`）
+  - 异常体系：`LLMError` / `ProviderNotFoundError` / `ProviderInitError` / `RateLimitError` 等
+  - `qingqiu llm test <provider>` 子命令测试 provider 是否可用
+  - 45 个 pytest 测试（mock SDK 调用，无实际 API 依赖）
+  - 验收 PASS：pytest 50/50 通过（S1.1 + S1.2）
+  - 见 [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) S1.2
 
 ---
 
