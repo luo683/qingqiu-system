@@ -23,7 +23,7 @@
 | **测试** | 50 个 pytest 全通过 |
 | **文档** | 11 份核心 + 5 份 references/ 标准 = 16 份 |
 | **里程碑** | M0 ✅ / **M1 进行中（S1.1+S1.2 完成）** / M2-M10 pending |
-| **当前切片** | ✅ **S1.2 完成** · 下一个：S1.3（配置系统，1 天） |
+| **当前切片** | ✅ **S1.2 真跑落地完成** · 下一个：S1.3（配置系统，1 天） |
 | **仓库** | ✅ GitHub URL 已确认：`https://github.com/luo683/qingqiu-system` |
 
 ---
@@ -134,7 +134,7 @@ Obsidian 接入 + 知识图谱 UI + 自我成长 + 持续打磨。
 | D-007 | 2026-07-05 | 密钥不进前端 | API key 全在 daemon + keyring |
 | D-008 | 2026-07-05 | **Git 仓库对接**：luo683/qingqiu-system | 已确认 URL；待首次 push |
 | D-009 | 2026-07-05 | **S1.1 完成**：项目骨架就位 | pyproject.toml + src/ + CLI + 5 测试通过；分支 master → main |
-| D-010 | 2026-07-05 | **S1.2 完成（待真跑验证）**：LLM 抽象层就位 | 4 provider + router + 工厂；50/50 mock 测试通过；**真 API 真跑待补** |
+| D-010 | 2026-07-05 | **S1.2 真跑落地完成**：LLM 抽象层就位 | 4 provider + router + 工厂；50/50 mock 测试通过 + **CustomProvider 真打 MiniMax API PASS** |
 | D-011 | 2026-07-05 | **验收纪律立规则**：每个 slice 必须真实端到端跑通，不只 mock | 创建 VERIFICATION.md 文档；S1.2 是首个未满足此规则的切片（待补真跑） |
 
 ---

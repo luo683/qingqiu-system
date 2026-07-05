@@ -26,9 +26,12 @@
   - `LLMRouter` 按角色分派（如 `router: cheap` / `planner: strong` / `memory: local`）
   - 异常体系：`LLMError` / `ProviderNotFoundError` / `ProviderInitError` / `RateLimitError` 等
   - `qingqiu llm test <provider>` 子命令测试 provider 是否可用
-  - 45 个 pytest 测试（mock SDK 调用，无实际 API 依赖）
-  - 验收 PASS：pytest 50/50 通过（S1.1 + S1.2）
+  - 45 个 pytest 测试（mock SDK 调用）
+  - mock 测试 PASS：pytest 50/50（S1.1 + S1.2）
+  - **🆕 真跑落地 PASS**：CustomProvider 真打 MiniMax API（`MiniMax-Text-01`），返回 `'Hello from custom!'`，input=562 / output=4。证据：[docs/verification/S1.2_llm_custom.log.md](./docs/verification/S1.2_llm_custom.log.md)
+  - 4 个 provider 中 1 个真跑通（Custom/MiniMax）；其余 3 个 mock 通过待真跑
   - 见 [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) S1.2
+  - 见 [VERIFICATION.md](./VERIFICATION.md) 验收纪律
 
 ---
 
