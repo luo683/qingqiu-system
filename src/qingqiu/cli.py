@@ -1,15 +1,10 @@
-"""qingqiu CLI 入口 · S1.2 含 LLM 子命令
+"""qingqiu CLI 入口
 
-S1.1 范围（已完成）：
-- qingqiu --version
-- qingqiu config show（占位）
+S1.1: --version / -v / config show（占位）
+S1.2: llm test <provider>
+S1.3: config show（真工作）+ config path
 
-S1.2 范围（新增）：
-- qingqiu llm test <provider> 测试 provider 是否可用
-
-后续切片（不在本 slice 范围）：
-- S1.3 配置系统（YAML + 优先级 + 热重载）
-- S2.x 子命令填充（task / chat / graph 等）
+后续切片：task / chat / graph 等
 """
 
 from __future__ import annotations
@@ -17,12 +12,12 @@ from __future__ import annotations
 import argparse
 import asyncio
 import sys
+from pathlib import Path
 
 from qingqiu import __version__
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """构建 argparse parser"""
     parser = argparse.ArgumentParser(
         prog="qingqiu",
         description="清秋 · 本地优先的个人 AI 助理",
@@ -35,9 +30,10 @@ def build_parser() -> argparse.ArgumentParser:
     # config 子命令
     config_parser = subparsers.add_parser("config", help="查看和管理配置")
     config_sub = config_parser.add_subparsers(dest="subcommand")
-    config_sub.add_parser("show", help="打印合并后的配置")
+    config_sub.add_parser("show", help="打印合并后的配置（默认 + 文件 + 环境变量）")
+    config_sub.add_parser("path", help="显示配置文件路径")
 
-    # llm 子命令（S1.2 新增）
+    # llm 子命令
     llm_parser = subparsers.add_parser("llm", help="LLM provider 管理")
     llm_sub = llm_parser.add_subparsers(dest="llm_subcommand")
     llm_test = llm_sub.add_parser("test", help="测试 provider 是否可用")
@@ -56,22 +52,37 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def cmd_version(_args: argparse.Namespace) -> int:
-    """`qingqiu --version`"""
     print(f"qingqiu {__version__}")
     return 0
 
 
 def cmd_config_show(_args: argparse.Namespace) -> int:
-    """`qingqiu config show` · S1.1 占位（实现在 S1.3）"""
-    print("# qingqiu config (S1.1 placeholder)")
-    print(f"# version: {__version__}")
-    print("# config_file: ~/.qingqiu/config.yaml (创建于 S1.3)")
-    print("# 实际配置加载将在 S1.3 实现")
+    """`qingqiu config show` · S1.3: 真工作（不是占位）"""
+    import yaml
+
+    from qingqiu.config import ConfigManager
+
+    manager = ConfigManager()
+    manager.load()
+    data = manager.config.model_dump(mode="json", exclude_none=True)
+    yaml_str = yaml.safe_dump(data, allow_unicode=True, sort_keys=False)
+    print(yaml_str, end="")
+    print(f"# config_file: {manager.config_path}")
+    print(f"# source: defaults < file < env vars")
+    return 0
+
+
+def cmd_config_path(_args: argparse.Namespace) -> int:
+    """`qingqiu config path` · 显示配置文件位置"""
+    from qingqiu.config import get_default_config_path
+
+    path = get_default_config_path()
+    print(path)
+    print(f"# exists: {path.exists()}")
     return 0
 
 
 async def cmd_llm_test_async(args: argparse.Namespace) -> int:
-    """`qingqiu llm test <provider>` · S1.2 异步入口"""
     from qingqiu.llm import Message, get_provider
     from qingqiu.llm.exceptions import LLMError, ProviderInitError
 
@@ -112,20 +123,23 @@ async def cmd_llm_test_async(args: argparse.Namespace) -> int:
 
 
 def cmd_llm_test(args: argparse.Namespace) -> int:
-    """`qingqiu llm test <provider>` · 同步包装"""
     return asyncio.run(cmd_llm_test_async(args))
 
 
 def main(argv: list[str] | None = None) -> int:
-    """CLI 主入口"""
     parser = build_parser()
     args = parser.parse_args(argv)
 
     if args.version:
         return cmd_version(args)
 
-    if args.command == "config" and args.subcommand == "show":
-        return cmd_config_show(args)
+    if args.command == "config":
+        if args.subcommand == "show":
+            return cmd_config_show(args)
+        if args.subcommand == "path":
+            return cmd_config_path(args)
+        # 无子命令输出 config 帮助
+        parser.parse_args([args.command, "--help"])
 
     if args.command == "llm" and args.llm_subcommand == "test":
         return cmd_llm_test(args)

@@ -37,12 +37,16 @@ def test_help_flag_outputs_usage() -> None:
     assert "清秋" in result.stdout or "qingqiu" in result.stdout
 
 
-def test_config_show_outputs_placeholder() -> None:
-    """`qingqiu config show` 输出 S1.1 占位配置"""
+def test_config_show_outputs_real_config() -> None:
+    """S1.3: `qingqiu config show` 真显示配置（不再是占位）"""
     result = run_qingqiu("config", "show")
     assert result.returncode == 0
-    assert "S1.1 placeholder" in result.stdout
-    assert "0.3.0" in result.stdout
+    # S1.1 的占位文本已废弃
+    assert "S1.1 placeholder" not in result.stdout
+    # 应该含真实配置字段
+    assert "0.3.0" in result.stdout  # 版本号
+    assert "personality:" in result.stdout  # 配置段
+    assert "清秋" in result.stdout  # 默认人格名
 
 
 def test_verbose_flag_outputs_extra_info() -> None:

@@ -8,6 +8,7 @@ authors = [{ name = "ROG" }]
 keywords = ["ai", "assistant", "voice", "obsidian", "local-first", "hermes"]
 
 # S1.2 起加 LLM provider 依赖（S1.2 范围）
+# S1.3 起加 YAML / pydantic 配置支持
 dependencies = [
     "openai>=1.0",
     "anthropic>=0.30",
@@ -15,6 +16,7 @@ dependencies = [
     "httpx>=0.25",
     "tenacity>=8.0",
     "pydantic>=2.0",
+    "PyYAML>=6.0",
 ]
 
 [project.scripts]
