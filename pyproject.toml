@@ -7,9 +7,15 @@ license = { text = "Proprietary" }
 authors = [{ name = "ROG" }]
 keywords = ["ai", "assistant", "voice", "obsidian", "local-first", "hermes"]
 
-# 依赖留空：S1.1 最小骨架只用 Python 标准库
-# 后续切片按 IMPLEMENTATION-PLAN.md 渐进加
-dependencies = []
+# S1.2 起加 LLM provider 依赖（S1.2 范围）
+dependencies = [
+    "openai>=1.0",
+    "anthropic>=0.30",
+    "ollama>=0.2",
+    "httpx>=0.25",
+    "tenacity>=8.0",
+    "pydantic>=2.0",
+]
 
 [project.scripts]
 qingqiu = "qingqiu.cli:main"
@@ -23,7 +29,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/qingqiu"]
-include = ["README.md"]
 
 # --- Tool configuration ---
 
@@ -36,6 +41,13 @@ select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101"]  # allow `assert` in tests
+"src/qingqiu/llm/*" = ["E501"]  # long lines OK in provider SDK calls
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
 
 [tool.mypy]
 python_version = "3.11"
@@ -45,3 +57,4 @@ warn_unused_ignores = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --strict-markers"
+asyncio_mode = "auto"
