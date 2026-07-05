@@ -53,7 +53,9 @@
 
 | 任务 | 状态 |
 |------|------|
-| **Git 首次推送** | 待用户执行（push 命令需要 PAT 输入） |
+| **Git 首次推送** | ✅ **完成**：15 commits → `luo683/qingqiu-system` main 分支 |
+| **S2.1 设计** | ✅ **完成**：[docs/slices/S2.1_router_design.md](./docs/slices/S2.1_router_design.md) · 待 review 后开分支 |
+| **S2.1 代码实施** | 待开始（设计已就绪，等开 `slice/S2.1` 分支） |
 
 ### 3.3 待办 📋
 
