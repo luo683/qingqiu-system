@@ -68,6 +68,60 @@
   - **🆕 真跑落地 PASS**：4 步验证全过（4 层独立 set/get / L3 跨进程持久化 / facade 跨层查找 + 分层写入 / 文件 + SQLite 结构）。证据：[docs/verification/S1.5_memory.log.md](./docs/verification/S1.5_memory.log.md)
   - mock 测试 PASS：pytest 119/119（S1.1 + S1.2 + S1.3 + S1.4 + S1.5）
   - 见 [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) S1.5
+- **S2.1 · CLI 入口 + 子命令骨架**（2026-07-05 · M2 起步）
+  - **架构重构**：`src/qingqiu/cli.py` (167 行) → `src/qingqiu/cli/` 包（9 文件）
+  - `cli/main.py`：parser + dispatch + 老 config/llm handler 回填
+  - `cli/errors.py`：CLIError 体系（code 0/1/2 + NotFound/Validation/Config/Storage）
+  - `cli/output.py`：OutputFormatter（human/JSON + table + error/success）
+  - `cli/memory.py`：memory 子命令 5 action（get/set/list/delete/search · 接 S1.5 facade）
+  - `cli/task.py`：task 子命令 5 action（list/show/add/done/archive · JSON 文件）
+  - `cli/status.py`：daemon/LLM/memory 3 块输出 + --section 过滤
+  - `cli/config.py` + `cli/llm.py`：从 main.py 拆分
+  - 占位子命令：ask/chat（M2 后续切片接入）
+  - 全局 flag：--json / --no-color / --config
+  - 57 个 pytest 测试（errors/output/memory/task/status/parser）
+  - **🆕 真跑落地 PASS**：12 步端到端验证全过（memory CRUD + L1 Markdown 持久化 + JSON 模式 + task 完整 CRUD + status 3 块 + 老命令不回归）。证据：[docs/verification/S2.1_cli.log.md](./docs/verification/S2.1_cli.log.md)
+  - mock 测试 PASS：pytest 171/171（S1.1 + S1.2 + S1.3 + S1.4 + S1.5 + S2.1）
+  - 设计文档：[docs/slices/S2.1_router_design.md](./docs/slices/S2.1_router_design.md)
+  - **Git 首次推送**（D-017）：15 commits → `luo683/qingqiu-system` main 分支（PAT 缓存自动认证）
+  - 分支 `slice/S2.1`：完整实施待 review + 合 main
+  - 见 [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) S2.1
+- **S5.2 · 目录白名单**（2026-07-05 · M5 安全基础）
+  - `src/qingqiu/security/whitelist.py`：WHITELIST_DIRS（4 个 · PRD §6.1）+ WhitelistError (code=2)
+  - 接口：`is_whitelisted(path)` / `check_path(path, op)` / `resolve(path)`
+  - 路径规范化：`expanduser().resolve()` 处理 .. 反向 + 相对路径
+  - 防前缀相似攻击：用 `relative_to` 而非字符串前缀匹配
+  - 26 个 pytest 测试覆盖 4 目录 + 黑名单 + 边界 + 跨平台分隔符
+  - **🆕 真跑落地 PASS**：6 步验证全过（README 在白名单 / hosts 被拒 / check_path 返绝对 / SAM 抛异常 / .. 反向规范化 / Downloads 通过）。证据：[docs/verification/S5.2_whitelist.log.md](./docs/verification/S5.2_whitelist.log.md)
+  - mock 测试 PASS：pytest 197/197
+  - 分支 `slice/S5.2`：commit `49c6be0`
+  - 见 [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) S5.2
+- **S5.3 · 危险操作黑名单**（2026-07-05 · M5 安全基础）
+  - `src/qingqiu/security/blacklist.py`：BlacklistError (code=1) + OperationType 枚举
+  - Shell 命令黑名单（regex）：rm -rf / git push --force / format c: / reg add / systemctl / chmod 777 /
+  - 操作黑名单：EMAIL_SEND / IM_SEND / CLOUD_UPLOAD / CROSS_DIR_MOVE / PRIVATE_FILE_READ / MEMORY_EXPORT / VAULT_BATCH_MODIFY / VAULT_DELETE
+  - 接口：`check_shell(cmd)` / `check_operation(op)` / `is_blacklisted_*` 不抛异常版本
+  - 38 个 pytest 测试覆盖 shell + operation + 边界
+  - **🆕 真跑落地 PASS**：完整验证（agent 真跑落地）
+  - mock 测试 PASS：pytest 209/209（合并到 S5.3 worktree 后）
+  - 分支 `slice/S5.3`：commit `13653e7`
+  - 见 [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) S5.3
+- **🆕 验收纪律：M5 切片 + agent 派发**（2026-07-05）
+  - **agent 派发模式**（D-019/D-020 教训）：
+    - mavis spawn 长中文 content 截断 bug → workaround：短 ASCII 指令 + default workspace JSON 文件 + agent 用 Read tool 读
+    - agent "完成" ≠ 真完成 → 必须 `git log` + `git status` + pytest 三件套验证
+    - agent 可能在自己 default workspace 伪造 commit → 必须看主 worktree 状态
+    - spawn 时必须明确告诉 agent worktree 路径 + 任务目标
+  - **worktree 隔离**：每个切片独立 `.worktrees/slice-S<n>.<m>` 分支，避免 agent 冲突
+  - **cron 监控**：每 2h 自动检查进度 + 14 天 TTL
+  - 见 [docs/handoffs/2026-07-05-day1.md](./docs/handoffs/2026-07-05-day1.md) 第一天完整 handoff
+- **🆕 第一天收工 handoff**（2026-07-05 23:08）
+  - 创建 [docs/handoffs/2026-07-05-day1.md](./docs/handoffs/2026-07-05-day1.md)：完整进度 + 决策 D-001 to D-020 + 经验教训 + 明天 TODO
+  - 项目主仓库切换到 main + cherry-pick handoff → push `e7966d5` 到 origin/main
+  - PROJECT.md §9 加 handoff 链接（启动 session 必读）
+  - cron `s5-check` 删除（S5.x 都完成且 push）
+
+---
 
 ---
 
