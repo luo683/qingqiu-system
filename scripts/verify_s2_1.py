@@ -138,6 +138,91 @@ def main() -> int:
     check("llm test openai exit 1 (无 key)", r.returncode == 1, f"got {r.returncode}")
     print()
 
+    # === 11. task 子命令完整 CRUD ===
+    print("[step 11] task 子命令完整 CRUD")
+    task_file = Path.home() / ".qingqiu" / "tasks.json"
+    if task_file.exists():
+        task_file.unlink()
+
+    # add
+    r = run(["qingqiu", "task", "add", "fix S2.2 router"], project_dir)
+    check("task add exit 0", r.returncode == 0, r.stdout[:80])
+    assert "task added" in r.stdout
+
+    r = run(["qingqiu", "task", "add", "write S2.3 planner"], project_dir)
+    check("task add 第二个 exit 0", r.returncode == 0)
+
+    # list
+    r = run(["qingqiu", "task", "list"], project_dir)
+    check("task list exit 0", r.returncode == 0)
+    check("list 包含 fix", "fix S2.2 router" in r.stdout)
+    check("list 包含 write", "write S2.3 planner" in r.stdout)
+
+    # 从输出中提取 task ID
+    task_id_1 = None
+    for line in r.stdout.splitlines():
+        if "t-" in line:
+            parts = line.split()
+            for p in parts:
+                if p.startswith("t-"):
+                    task_id_1 = p
+                    break
+            if task_id_1:
+                break
+    check("提取到 task ID", task_id_1 is not None, str(task_id_1))
+
+    # done
+    if task_id_1:
+        r = run(["qingqiu", "task", "done", task_id_1], project_dir)
+        check("task done exit 0", r.returncode == 0)
+        check("task done 成功", "task done" in r.stdout)
+
+    # list --status done
+    r = run(["qingqiu", "task", "list", "--status", "done"], project_dir)
+    check("list done exit 0", r.returncode == 0)
+    check("list done 包含 task", task_id_1 in r.stdout if task_id_1 else False)
+
+    # show
+    if task_id_1:
+        r = run(["qingqiu", "task", "show", task_id_1], project_dir)
+        check("task show exit 0", r.returncode == 0)
+        check("show 包含 status", "status" in r.stdout or "done" in r.stdout)
+
+    # show 不存在
+    r = run(["qingqiu", "task", "show", "t-nonexistent"], project_dir)
+    check("show 不存在 exit 1", r.returncode == 1, f"got {r.returncode}")
+
+    # archive
+    if task_id_1:
+        r = run(["qingqiu", "task", "archive", task_id_1], project_dir)
+        check("task archive exit 0", r.returncode == 0)
+
+    # archive 不存在
+    r = run(["qingqiu", "task", "archive", "t-nope"], project_dir)
+    check("archive 不存在 exit 1", r.returncode == 1)
+    print()
+
+    # === 12. status 子命令 ===
+    print("[step 12] status 健康状态")
+    r = run(["qingqiu", "status"], project_dir)
+    check("status exit 0", r.returncode == 0)
+    check("status 包含 daemon", "daemon" in r.stdout.lower())
+    check("status 包含 llm", "llm" in r.stdout.lower())
+    check("status 包含 memory", "memory" in r.stdout.lower())
+
+    r = run(["qingqiu", "status", "--section", "llm"], project_dir)
+    check("status --section llm exit 0", r.returncode == 0)
+
+    r = run(["qingqiu", "--json", "status"], project_dir)
+    check("status --json exit 0", r.returncode == 0)
+    try:
+        payload = json.loads(r.stdout)
+        check("status JSON data 完整",
+              all(k in payload["data"] for k in ["daemon", "llm", "memory"]))
+    except json.JSONDecodeError as e:
+        check(f"status JSON 解析: {e}", False, r.stdout[:100])
+    print()
+
     # === 收尾 ===
     print("=" * 60)
     if failures:
@@ -145,8 +230,9 @@ def main() -> int:
         for f in failures:
             print(f"  - {f}")
         return 1
-    print("[verify] S2.1 PASS · 10 步验证全过")
+    print("[verify] S2.1 PASS · 12 步验证全过")
     print(f"[verify] L1 文件保留: {l1_file}")
+    print(f"[verify] Task 文件: {task_file} ({task_file.stat().st_size} bytes)")
     return 0
 
 

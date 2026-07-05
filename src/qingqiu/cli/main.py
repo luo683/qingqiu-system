@@ -16,9 +16,13 @@ from pathlib import Path
 from loguru import logger as loguru_logger
 
 from qingqiu import __version__
+from qingqiu.cli.config import build_parser as build_config_parser
 from qingqiu.cli.errors import CLIError
+from qingqiu.cli.llm import build_parser as build_llm_parser
 from qingqiu.cli.memory import build_parser as build_memory_parser
 from qingqiu.cli.output import OutputFormatter
+from qingqiu.cli.status import build_parser as build_status_parser
+from qingqiu.cli.task import build_parser as build_task_parser
 from qingqiu.observability import get_logger, setup_logging
 
 
@@ -70,42 +74,20 @@ def build_parser() -> argparse.ArgumentParser:
     p_chat = subparsers.add_parser("chat", help="交互模式（占位：M2.6 端到端）")
     p_chat.set_defaults(_handler=lambda args, out: _placeholder_chat(args, out))
 
-    # task 占位
-    p_task = subparsers.add_parser("task", help="任务管理（M2.6 实现）")
-    task_sub = p_task.add_subparsers(dest="task_subcommand")
-    p_task_list = task_sub.add_parser("list", help="列任务")
-    p_task_list.set_defaults(_handler=lambda args, out: _placeholder_task(args, out))
-    p_task_show = task_sub.add_parser("show", help="看任务")
-    p_task_show.add_argument("id")
-    p_task_show.set_defaults(_handler=lambda args, out: _placeholder_task(args, out))
-    p_task_add = task_sub.add_parser("add", help="加任务")
-    p_task_add.add_argument("description", nargs="+")
-    p_task_add.set_defaults(_handler=lambda args, out: _placeholder_task(args, out))
+    # task（接 S2.1 task.py · 5 action）
+    build_task_parser(subparsers)
 
-    # status 占位
-    p_status = subparsers.add_parser("status", help="健康状态（占位）")
-    p_status.set_defaults(_handler=lambda args, out: _placeholder_status(args, out))
+    # status（接 S2.1 status.py · 3 块输出）
+    build_status_parser(subparsers)
 
-    # memory（接 S1.5）
+    # memory（接 S1.5 facade）
     build_memory_parser(subparsers)
 
-    # config（老的，回填）
-    p_config = subparsers.add_parser("config", help="查看和管理配置")
-    config_sub = p_config.add_subparsers(dest="subcommand")
-    p_config_show = config_sub.add_parser("show", help="打印合并后的配置")
-    p_config_show.set_defaults(_handler=_config_show)
-    p_config_path = config_sub.add_parser("path", help="显示配置文件路径")
-    p_config_path.set_defaults(_handler=_config_path)
+    # config
+    build_config_parser(subparsers)
 
-    # llm（老的，回填）
-    p_llm = subparsers.add_parser("llm", help="LLM provider 管理")
-    llm_sub = p_llm.add_subparsers(dest="llm_subcommand")
-    p_llm_test = llm_sub.add_parser("test", help="测试 provider")
-    p_llm_test.add_argument(
-        "provider", choices=["openai", "anthropic", "ollama", "custom"]
-    )
-    p_llm_test.add_argument("--model", default=None)
-    p_llm_test.set_defaults(_handler=_llm_test)
+    # llm
+    build_llm_parser(subparsers)
 
     return parser
 
@@ -121,109 +103,6 @@ def _placeholder_ask(args, out: OutputFormatter) -> int:
 def _placeholder_chat(args, out: OutputFormatter) -> int:
     out.info("chat 子命令尚未实现（S2.6 端到端后启用）")
     return 0
-
-
-def _placeholder_task(args, out: OutputFormatter) -> int:
-    out.info("task 子命令尚未实现（S2.6 端到端后启用）")
-    return 0
-
-
-def _placeholder_status(args, out: OutputFormatter) -> int:
-    out.info("status 子命令尚未实现（M3+ 启用）")
-    return 0
-
-
-# === 老 config / llm handlers（从老 cli.py 搬过来） ===
-
-def _config_show(args, out: OutputFormatter) -> int:
-    import yaml
-
-    from qingqiu.config import ConfigManager
-
-    manager = ConfigManager()
-    manager.load()
-    data = manager.config.model_dump(mode="json", exclude_none=True)
-    if out.json_mode:
-        out.print({"config": data, "source": "defaults < file < env vars"})
-        return 0
-    yaml_str = yaml.safe_dump(data, allow_unicode=True, sort_keys=False)
-    print(yaml_str, end="")
-    print(f"# config_file: {manager.config_path}")
-    print(f"# source: defaults < file < env vars")
-    return 0
-
-
-def _config_path(args, out: OutputFormatter) -> int:
-    from qingqiu.config import get_default_config_path
-
-    path = get_default_config_path()
-    if out.json_mode:
-        out.print({"path": str(path), "exists": path.exists()})
-        return 0
-    print(path)
-    print(f"# exists: {path.exists()}")
-    return 0
-
-
-async def _llm_test_async(args, out: OutputFormatter) -> int:
-    from qingqiu.llm import Message, get_provider
-    from qingqiu.llm.exceptions import LLMError, ProviderInitError
-
-    log = get_logger("qingqiu.cli.llm_test")
-    provider_name = args.provider
-    log.info(f"开始测试 provider={provider_name}")
-    print(f"[test] 初始化 {provider_name} provider ...")
-
-    try:
-        provider = get_provider(provider_name)
-    except ProviderInitError as e:
-        log.error(f"provider 初始化失败: {provider_name}, error={e}")
-        out.error(f"provider 初始化失败: {e}", code=1)
-        return 1
-    except Exception as e:
-        log.error(f"provider 初始化异常: {provider_name}, type={type(e).__name__}, error={e}")
-        out.error(f"未知错误: {e}", code=1)
-        return 1
-
-    log.info(f"provider 初始化 OK: {provider_name}, default_model={provider.default_model}")
-    print(f"[test] 初始化 OK (default_model={provider.default_model})")
-    print(f"[test] 发送测试 prompt ...")
-
-    try:
-        response = await provider.complete(
-            [Message(role="user", content=f"Say hello from {provider_name} and nothing else.")],
-            model=args.model,
-            max_tokens=50,
-        )
-    except LLMError as e:
-        log.error(f"LLM 调用失败: {provider_name}, error={e}")
-        out.error(f"LLM 调用失败: {e}", code=1)
-        return 1
-    except Exception as e:
-        log.error(f"LLM 调用异常: {provider_name}, type={type(e).__name__}, error={e}")
-        out.error(f"调用异常: {type(e).__name__}: {e}", code=1)
-        return 1
-
-    log.info(f"LLM 调用 OK: {provider_name}, model={response.model}")
-    if out.json_mode:
-        out.print({
-            "provider": provider_name,
-            "model": response.model,
-            "content": response.content,
-            "usage": response.usage,
-        })
-    else:
-        print(f"[OK] {provider_name} 响应：")
-        print(f"  content: {response.content!r}")
-        print(f"  model:   {response.model}")
-        print(f"  usage:   input={response.usage.get('input_tokens', 0)}, "
-              f"output={response.usage.get('output_tokens', 0)}")
-    return 0
-
-
-def _llm_test(args, out: OutputFormatter) -> int:
-    import asyncio
-    return asyncio.run(_llm_test_async(args, out))
 
 
 # === main ===

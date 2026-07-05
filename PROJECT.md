@@ -55,8 +55,8 @@
 |------|------|
 | **Git 首次推送** | ✅ **完成**：15 commits → `luo683/qingqiu-system` main 分支 |
 | **S2.1 设计** | ✅ **完成**：[docs/slices/S2.1_router_design.md](./docs/slices/S2.1_router_design.md) · review 通过 |
-| **S2.1 核心实施** | ✅ **完成 40%**（分支 `slice/S2.1`）：cli/ 包拆分 + errors + output + main + memory 子命令 + 25 测试 + 10 步真跑 PASS · 139/139 全量不回归 |
-| **S2.1 续接** | 待开始（ask/chat/task/status 占位 + 拆老 config/llm + ~30 个测试） |
+| **S2.1 完整实施** | ✅ **完成 100%**（分支 `slice/S2.1`）：cli/ 包拆分 8 个文件 + errors + output + memory/task/status/config/llm 子命令 + 57 测试 + 12 步真跑 PASS · 171/171 全量不回归 |
+| **S2.2 router 意图识别** | 待开始（3d 估时，LLM JSON mode + 规则兜底） |
 
 ### 3.3 待办 📋
 
@@ -149,6 +149,7 @@ Obsidian 接入 + 知识图谱 UI + 自我成长 + 持续打磨。
 | D-015 | 2026-07-05 | **S2.1 设计 review 通过**：5 review 点全 OK | 子命令树范围 OK / `--json` 一刀切 OK / 退出码 0/1/2 OK / 不加 tui OK / status 3 块输出 OK |
 | D-016 | 2026-07-05 | **S2.1 核心实施 40%**：CLI 子命令骨架 | cli/ 包拆分（4 个新文件）+ errors 体系 + output human/json + memory 子命令接 S1.5 + 25 测试 + 10 步真跑 PASS · 139/139 全量不回归 · 分支 `slice/S2.1` 待 push |
 | D-017 | 2026-07-05 | **Git 首次推送成功**（PAT 缓存自动认证） | `git remote add` + `git push -u` 一次性完成 · 16 commits 到 `luo683/qingqiu-system` main |
+| D-018 | 2026-07-05 | **S2.1 完整实施 100%**：CLI 子命令骨架全部就位 | cli/ 包 8 文件 + memory/task/status 三个完整子命令 + config/llm 拆分 + 57 测试 + 12 步真跑 PASS · 171/171 全量不回归 · 分支 `slice/S2.1` |
 
 ---
 
