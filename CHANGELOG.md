@@ -32,6 +32,18 @@
   - 4 个 provider 中 1 个真跑通（Custom/MiniMax）；其余 3 个 mock 通过待真跑
   - 见 [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) S1.2
   - 见 [VERIFICATION.md](./VERIFICATION.md) 验收纪律
+- **S1.3 · 配置系统**（2026-07-05）
+  - 6 个 Pydantic 子配置：`LLMConfig` / `VoiceConfig` / `SecurityConfig` / `LoggingConfig` / `ObsidianConfig` / `PersonalityConfig`
+  - `ConfigManager` 支持加载 + 优先级 + polling 热重载
+  - 优先级：CLI > 环境变量（`QINGQIU_<KEY>`）> 文件（`~/.qingqiu/config.yaml`）> 默认值
+  - 热重载：polling 1s 检查 `(mtime, size)` 签名变化（避免 Windows mtime 精度问题）
+  - 加载失败兜底：保留旧 Config 对象（不让损坏 config 拖垮 daemon）
+  - atomic write（写 `.tmp` + rename）
+  - CLI 更新：`qingqiu config show` 真工作 / `qingqiu config path` 显示路径
+  - 31 个 pytest 测试（mock）
+  - mock 测试 PASS：pytest 81/81（S1.1 + S1.2 + S1.3）
+  - **🆕 真跑落地 PASS**：4 项验证全过（CLI / 文件加载 / 优先级 / 热重载 1s 内）。证据：[docs/verification/S1.3_config.log.md](./docs/verification/S1.3_config.log.md)
+  - 见 [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) S1.3
 
 ---
 
