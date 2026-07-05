@@ -8,6 +8,10 @@
 ## [Unreleased]
 
 ### Added
+- **🆕 验收纪律：每个 slice 必须真跑落地**（2026-07-05）
+  - 创建 [VERIFICATION.md](./VERIFICATION.md) 强约束文档
+  - mock 通过 ≠ 真跑通；必须真实端到端验证 + 记录证据到 `docs/verification/`
+  - 用户明确要求："每次做完功能之后要检验功能能否实现并成功跑通落地"
 - **S1.1 · 项目骨架与配置入口**（2026-07-05）
   - `pyproject.toml`（uv + hatchling，dependencies 留空）
   - `src/qingqiu/` 包结构（`__init__.py` + `cli.py` + `__main__.py`）

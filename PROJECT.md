@@ -134,7 +134,8 @@ Obsidian 接入 + 知识图谱 UI + 自我成长 + 持续打磨。
 | D-007 | 2026-07-05 | 密钥不进前端 | API key 全在 daemon + keyring |
 | D-008 | 2026-07-05 | **Git 仓库对接**：luo683/qingqiu-system | 已确认 URL；待首次 push |
 | D-009 | 2026-07-05 | **S1.1 完成**：项目骨架就位 | pyproject.toml + src/ + CLI + 5 测试通过；分支 master → main |
-| D-010 | 2026-07-05 | **S1.2 完成**：LLM 抽象层就位 | 4 provider + router + 工厂；50/50 测试通过 |
+| D-010 | 2026-07-05 | **S1.2 完成（待真跑验证）**：LLM 抽象层就位 | 4 provider + router + 工厂；50/50 mock 测试通过；**真 API 真跑待补** |
+| D-011 | 2026-07-05 | **验收纪律立规则**：每个 slice 必须真实端到端跑通，不只 mock | 创建 VERIFICATION.md 文档；S1.2 是首个未满足此规则的切片（待补真跑） |
 
 ---
 
@@ -146,6 +147,7 @@ Obsidian 接入 + 知识图谱 UI + 自我成长 + 持续打磨。
 - **分支策略：** `main`（稳定）+ `slice/S<n>.<m>`（每个切片一个分支）
 - **Commit 风格：** Conventional Commits（`feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `test:`）
 - **.gitignore：** 见 `.gitignore`（不提交 `~/.qingqiu/`、API key、vault 内容、venv、build）
+- **真跑证据：** `docs/verification/S<n>.<m>.log`（详见 [VERIFICATION.md](./VERIFICATION.md)）
 
 ### 7.1 Git 推送步骤（**你跑**）
 

@@ -41,6 +41,7 @@
 | **引用规范** | ✅ 引用代码用 `file:line` 格式 |
 | **记录决策** | ✅ 大决策写到 PROJECT.md §6 决策记录 |
 | **跑通验收** | ✅ 每个切片完成跑通验收命令再交 |
+| **🆕 真跑不只 mock** | ✅ mock 通过 ≠ 真跑通。每个 slice 必须真实端到端跑通 + 记录证据到 `docs/verification/S<n>.<m>.log`。详见 [VERIFICATION.md](./VERIFICATION.md) |
 
 ---
 
