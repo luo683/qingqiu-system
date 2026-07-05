@@ -56,6 +56,18 @@
   - **🆕 真跑落地 PASS**：跑 5 个混合命令（version / llm test ollama / llm test openai / config show / -v），main log 1.59KB / 19 行；error log 0.37KB / 2 行（仅 ERROR）。证据：[docs/verification/S1.4_logging.log.md](./docs/verification/S1.4_logging.log.md)
   - mock 测试 PASS：pytest 87/87（S1.1 + S1.2 + S1.3 + S1.4）
   - 见 [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) S1.4
+- **S1.5 · Memory 四层空壳**（2026-07-05）
+  - 4 层记忆体系（PRD §8.1 + ARCH §92）：
+    - **L0 会话内**：`src/qingqiu/memory/l0.py` · 内存 dict（RLock 线程安全）
+    - **L1 项目级**：`src/qingqiu/memory/l1.py` · Markdown 文件（`~/.qingqiu/memory/projects/<name>.md`，atomic write）
+    - **L2 用户级**：`src/qingqiu/memory/l2.py` · Markdown 文件（继承 L1，默认 `~/.qingqiu/memory/user.md`）
+    - **L3 长期事实**：`src/qingqiu/memory/l3.py` · SQLite（`~/.qingqiu/memory/facts.sqlite`，facts 表含 key/value/created_at/updated_at）
+  - `MemoryLayer` Protocol（`base.py`）：4 层统一接口（name / get / set / delete / list_keys）
+  - `Memory` facade（`manager.py`）：默认 4 层；`get(key)` 从 L0 短路查找；`set(key, value, layer="L3")` 默认写 L3
+  - 32 个 pytest 测试覆盖 4 层独立 + facade 跨层
+  - **🆕 真跑落地 PASS**：4 步验证全过（4 层独立 set/get / L3 跨进程持久化 / facade 跨层查找 + 分层写入 / 文件 + SQLite 结构）。证据：[docs/verification/S1.5_memory.log.md](./docs/verification/S1.5_memory.log.md)
+  - mock 测试 PASS：pytest 119/119（S1.1 + S1.2 + S1.3 + S1.4 + S1.5）
+  - 见 [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) S1.5
 
 ---
 
