@@ -54,3 +54,6 @@ credentials.json
 .qingqiu/
 memory/private/
 qingqiu.egg-info/
+
+# Git worktrees（embedded repos，不应该 commit）
+.worktrees/

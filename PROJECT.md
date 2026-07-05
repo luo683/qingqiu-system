@@ -219,9 +219,10 @@ git push -u origin main
 
 ## 9. 下次 session 必读
 
-1. [README.md](./README.md) — 文档地图
-2. [PROJECT.md](./PROJECT.md)（本文）— 当前状态
-3. [ARCH.md](./ARCH.md) §10 — 开发纪律
+1. **🔥 [docs/handoffs/2026-07-05-day1.md](./docs/handoffs/2026-07-05-day1.md)** — 第一天完整 handoff（进度 + 决策 + 经验 + TODO）· 必读
+2. [README.md](./README.md) — 文档地图
+3. [PROJECT.md](./PROJECT.md)（本文）— 当前状态
+4. [ARCH.md](./ARCH.md) §10 — 开发纪律
 
 ---
 
