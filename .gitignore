@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# uv
+.uv-cache/
+
+# Testing / Lint
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Secrets / Credentials (NEVER commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.gpg
+credentials.json
+
+# Qingqiu runtime data (NEVER commit user data)
+# Per ARCH.md §7: runtime lives under ~/.qingqiu/
+# Per AGENTS.md §6.1: secrets stay out of repo
+.qingqiu/
+memory/private/
+qingqiu.egg-info/
