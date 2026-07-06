@@ -102,6 +102,36 @@ class Memory:
         """每层统计（P0-6 实装）"""
         return {lyr.name: {"keys": len(lyr.list_keys())} for lyr in self._layers}
 
+    def aggregate(self) -> dict:
+        """跨层聚合（S6.4 实装）
+
+        Returns:
+            {
+              "total_keys": int,
+              "per_layer": {L0: {keys, size_bytes?}, L1: {...}, L2: {...}, L3: {...}},
+              "duplicate_keys": [key]  # 出现在多层的 key
+            }
+        """
+        per_layer: dict[str, dict] = {}
+        key_layers: dict[str, list[str]] = {}
+
+        for lyr in self._layers:
+            keys = lyr.list_keys()
+            entry: dict = {"keys": len(keys)}
+            # L1 / L2 / L3 有 file path → 报 size
+            path = getattr(lyr, "path", None) or getattr(lyr, "db_path", None)
+            if path and path.exists():
+                entry["size_bytes"] = path.stat().st_size
+            per_layer[lyr.name] = entry
+            for k in keys:
+                key_layers.setdefault(k, []).append(lyr.name)
+
+        return {
+            "total_keys": sum(e["keys"] for e in per_layer.values()),
+            "per_layer": per_layer,
+            "duplicate_keys": [k for k, layers in key_layers.items() if len(layers) > 1],
+        }
+
     def _find_layer(self, name: str) -> MemoryLayer:
         for layer in self._layers:
             if layer.name == name:
