@@ -57,3 +57,11 @@ qingqiu.egg-info/
 
 # Git worktrees（embedded repos，不应该 commit）
 .worktrees/
+
+# Rust / Tauri build outputs（不要 commit 编译产物）
+src-tauri/target/
+src-tauri/Cargo.lock
+src-tauri/gen/
+
+# 测试输出 artifacts（验证脚本生成的 .wav 等）
+docs/verification/*.wav

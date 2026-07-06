@@ -17,6 +17,10 @@ use tauri::{
 fn open_devtools(window: tauri::WebviewWindow) {
     #[cfg(debug_assertions)]
     window.open_devtools();
+    #[cfg(not(debug_assertions))]
+    {
+        let _ = window;
+    }
 }
 
 fn main() {
