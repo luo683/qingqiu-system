@@ -51,6 +51,89 @@ class Plan:
             ],
         }
 
+    def topological_sort(self) -> list[Step]:
+        """拓扑排序（Kahn 算法）· 返回按依赖顺序的 steps
+
+        如果存在循环依赖 → 抛 ValueError
+        """
+        in_degree: dict[str, int] = {s.id: 0 for s in self.steps}
+        children: dict[str, list[str]] = {s.id: [] for s in self.steps}
+        for s in self.steps:
+            for dep in s.depends_on:
+                if dep in in_degree:
+                    in_degree[s.id] += 1
+                    children[dep].append(s.id)
+
+        queue = [sid for sid, deg in in_degree.items() if deg == 0]
+        sorted_ids: list[str] = []
+        id_to_step = {s.id: s for s in self.steps}
+
+        while queue:
+            # 按原顺序稳定排序
+            queue.sort(key=lambda x: int(x) if x.isdigit() else 0)
+            cur = queue.pop(0)
+            sorted_ids.append(cur)
+            for child in children[cur]:
+                in_degree[child] -= 1
+                if in_degree[child] == 0:
+                    queue.append(child)
+
+        if len(sorted_ids) != len(self.steps):
+            remaining = [s.id for s in self.steps if s.id not in sorted_ids]
+            raise ValueError(f"cycle detected in plan steps: {remaining}")
+        return [id_to_step[sid] for sid in sorted_ids]
+
+    def parallel_groups(self) -> list[list[Step]]:
+        """返回可并行的 step 分组（按拓扑层级）
+
+        Group 0 = 无依赖的 steps（可全部并行执行）
+        Group 1 = 依赖 Group 0 完成的 steps（可并行）
+        ...
+        """
+        # 计算每个 step 的深度（最长依赖链）
+        depth: dict[str, int] = {}
+        id_to_step = {s.id: s for s in self.steps}
+
+        def _depth(sid: str, visited: set[str] | None = None) -> int:
+            if sid in depth:
+                return depth[sid]
+            if visited is None:
+                visited = set()
+            if sid in visited:
+                return 0  # 防环
+            visited.add(sid)
+            step = id_to_step[sid]
+            if not step.depends_on:
+                depth[sid] = 0
+            else:
+                depth[sid] = 1 + max(_depth(d, visited) for d in step.depends_on if d in id_to_step)
+            return depth[sid]
+
+        for s in self.steps:
+            _depth(s.id)
+
+        groups: dict[int, list[Step]] = {}
+        for s in self.steps:
+            d = depth.get(s.id, 0)
+            groups.setdefault(d, []).append(s)
+
+        return [groups[d] for d in sorted(groups.keys())]
+
+    def to_mermaid(self) -> str:
+        """输出 Mermaid 图（用于 Markdown 文档 / README）"""
+        lines = ["```mermaid", "graph TD"]
+        # 每个 id 加 _node 后缀避免纯数字 ID（Mermaid 兼容）
+        id_map = {s.id: f"{s.id}_node".replace("-", "_") for s in self.steps}
+        for s in self.steps:
+            label = s.title.replace('"', "'")
+            lines.append(f'    {id_map[s.id]}["{s.id}. {label}"]')
+        for s in self.steps:
+            for dep in s.depends_on:
+                if dep in id_map:
+                    lines.append(f'    {id_map[dep]} --> {id_map[s.id]}')
+        lines.append("```")
+        return "\n".join(lines)
+
 
 # 简化规则：复杂任务模板
 _RULE_TEMPLATES = {
