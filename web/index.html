@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>清秋 · 知识图谱</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Microsoft YaHei", sans-serif;
+      background: #0f1216;
+      color: #e6edf3;
+    }
+    #app {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      grid-template-columns: 280px 1fr 320px;
+      grid-template-areas:
+        "header header header"
+        "side   graph  detail";
+      height: 100vh;
+    }
+    header {
+      grid-area: header;
+      padding: 10px 16px;
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    header h1 {
+      font-size: 16px;
+      margin: 0;
+      color: #f0f6fc;
+    }
+    header .source {
+      color: #8b949e;
+      font-size: 12px;
+    }
+    header input {
+      flex: 1;
+      padding: 6px 10px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #e6edf3;
+      font-size: 13px;
+      outline: none;
+    }
+    header input:focus {
+      border-color: #58a6ff;
+    }
+    header button {
+      padding: 6px 12px;
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #e6edf3;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    header button:hover {
+      background: #30363d;
+    }
+    #side {
+      grid-area: side;
+      padding: 12px;
+      background: #161b22;
+      border-right: 1px solid #30363d;
+      overflow-y: auto;
+    }
+    #side h2 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #8b949e;
+      margin: 12px 0 6px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      margin: 2px 4px 2px 0;
+      background: #1f6feb22;
+      border: 1px solid #1f6feb55;
+      border-radius: 10px;
+      font-size: 11px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .tag:hover { background: #1f6feb44; }
+    .tag.active { background: #1f6feb; color: white; }
+    #graph {
+      grid-area: graph;
+      background: #0d1117;
+    }
+    #detail {
+      grid-area: detail;
+      padding: 12px;
+      background: #161b22;
+      border-left: 1px solid #30363d;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+    #detail h2 {
+      font-size: 14px;
+      margin: 0 0 8px;
+      color: #f0f6fc;
+    }
+    #detail .empty {
+      color: #6e7681;
+      font-style: italic;
+    }
+    #detail dl {
+      margin: 8px 0;
+    }
+    #detail dt {
+      color: #8b949e;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-top: 8px;
+    }
+    #detail dd {
+      margin: 2px 0 0;
+      color: #e6edf3;
+      word-break: break-word;
+    }
+    #detail pre {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 8px;
+      overflow-x: auto;
+      font-size: 11px;
+      color: #e6edf3;
+    }
+    #stats {
+      color: #8b949e;
+      font-size: 11px;
+    }
+    .footer-link {
+      margin-top: 16px;
+      color: #6e7681;
+      font-size: 10px;
+    }
+  </style>
+  <!-- Cytoscape.js CDN (S9.3) -->
+  <script src="https://unpkg.com/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>清秋 · 知识图谱</h1>
+      <span class="source" id="source-label">loading…</span>
+      <input id="tag-input" type="text" placeholder="输入 tag 筛选（如 arch / memory / ui）" />
+      <button id="btn-apply">筛选</button>
+      <button id="btn-clear">清空</button>
+    </header>
+    <aside id="side">
+      <h2>节点 <span id="stats"></span></h2>
+      <div id="tags"></div>
+      <h2>使用</h2>
+      <ul style="padding-left: 18px; font-size: 12px; color: #c9d1d9; line-height: 1.6;">
+        <li>点击节点 → 右侧详情</li>
+        <li>hover 节点 → 高亮 + 显示 tag</li>
+        <li>拖拽 / 滚轮缩放</li>
+      </ul>
+      <p class="footer-link">M9 · S9.2/S9.3/S9.4</p>
+    </aside>
+    <div id="graph"></div>
+    <aside id="detail">
+      <h2>详情</h2>
+      <p class="empty">点击左侧图谱中的节点查看元数据。</p>
+    </aside>
+  </div>
+
+  <script>
+    'use strict';
+
+    // === State ===
+    const state = {
+      cy: null,
+      currentGraph: null,        // 最近一次成功的全图
+      currentFilter: '',
+      allTags: new Set(),
+    };
+
+    // === DOM ===
+    const $sourceLabel = document.getElementById('source-label');
+    const $tagInput = document.getElementById('tag-input');
+    const $btnApply = document.getElementById('btn-apply');
+    const $btnClear = document.getElementById('btn-clear');
+    const $tags = document.getElementById('tags');
+    const $stats = document.getElementById('stats');
+    const $detail = document.getElementById('detail');
+
+    // === API helpers ===
+    async function fetchGraph() {
+      const r = await fetch('/api/graph.json');
+      if (!r.ok) throw new Error('graph.json HTTP ' + r.status);
+      return r.json();
+    }
+
+    async function fetchFilter(tag) {
+      const url = '/api/filter?tag=' + encodeURIComponent(tag);
+      const r = await fetch(url);
+      if (!r.ok) throw new Error('filter HTTP ' + r.status);
+      return r.json();
+    }
+
+    async function fetchNode(id) {
+      const r = await fetch('/api/nodes/' + encodeURIComponent(id));
+      if (!r.ok) throw new Error('node HTTP ' + r.status);
+      return r.json();
+    }
+
+    // === Render ===
+    function collectTags(graph) {
+      const tags = new Set();
+      for (const n of graph.nodes) {
+        for (const t of (n.data.tags || [])) tags.add(t);
+      }
+      return tags;
+    }
+
+    function renderTagList() {
+      const tags = Array.from(state.allTags).sort();
+      $tags.innerHTML = '';
+      for (const t of tags) {
+        const span = document.createElement('span');
+        span.className = 'tag' + (state.currentFilter === t ? ' active' : '');
+        span.textContent = t;
+        span.addEventListener('click', () => {
+          state.currentFilter = t;
+          $tagInput.value = t;
+          applyFilter();
+        });
+        $tags.appendChild(span);
+      }
+    }
+
+    function initCytoscape(graph) {
+      const cy = cytoscape({
+        container: document.getElementById('graph'),
+        elements: [
+          ...graph.nodes,
+          ...graph.edges,
+        ],
+        layout: { name: 'cose', animate: false, idealEdgeLength: 100, nodeRepulsion: 8000 },
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'background-color': '#1f6feb',
+              'label': 'data(label)',
+              'color': '#e6edf3',
+              'font-size': 10,
+              'text-valign': 'bottom',
+              'text-margin-y': 4,
+              'width': 28,
+              'height': 28,
+            },
+          },
+          {
+            selector: 'node:hover',
+            style: { 'background-color': '#f0883e', 'border-width': 2, 'border-color': '#fff' },
+          },
+          {
+            selector: 'node:selected',
+            style: { 'background-color': '#f85149', 'border-width': 2, 'border-color': '#fff' },
+          },
+          {
+            selector: 'edge',
+            style: {
+              'curve-style': 'bezier',
+              'target-arrow-shape': 'triangle',
+              'line-color': '#30363d',
+              'target-arrow-color': '#30363d',
+              'width': 1,
+              'label': 'data(label)',
+              'font-size': 8,
+              'color': '#6e7681',
+              'text-rotation': 'autorotate',
+            },
+          },
+        ],
+        minZoom: 0.2,
+        maxZoom: 3,
+        wheelSensitivity: 0.2,
+      });
+
+      // Click → show details
+      cy.on('tap', 'node', async (evt) => {
+        const node = evt.target;
+        try {
+          const detail = await fetchNode(node.id());
+          renderDetail(detail);
+        } catch (e) {
+          renderDetailError(node, String(e));
+        }
+      });
+
+      // Tap background → clear detail
+      cy.on('tap', (evt) => {
+        if (evt.target === cy) {
+          renderDetailEmpty();
+        }
+      });
+
+      // Hover → show tags tooltip + highlight neighborhood
+      cy.on('mouseover', 'node', (evt) => {
+        const n = evt.target;
+        const tags = (n.data('tags') || []).join(', ') || '(无 tag)';
+        const neighborhood = n.closedNeighborhood();
+        cy.elements().removeClass('dimmed');
+        cy.elements().difference(neighborhood).addClass('dimmed');
+        n.qtip({
+          content: { text: tags },
+          show: { ready: true },
+          hide: { event: 'mouseout unfocus' },
+          position: { my: 'bottom center', at: 'top center' },
+          style: { classes: 'qtip-bootstrap' },
+        });
+      });
+      cy.on('mouseout', 'node', () => {
+        cy.elements().removeClass('dimmed');
+      });
+
+      return cy;
+    }
+
+    function renderDetail(node) {
+      const tagsHtml = (node.tags || []).map(t =>
+        `<span class="tag">${escapeHtml(t)}</span>`
+      ).join('');
+      const metaEntries = Object.entries(node.metadata || {});
+      const metaHtml = metaEntries.length
+        ? metaEntries.map(([k, v]) =>
+            `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(JSON.stringify(v))}</dd>`
+          ).join('')
+        : '<dd class="empty">(无 metadata)</dd>';
+      $detail.innerHTML = `
+        <h2>${escapeHtml(node.title)}</h2>
+        <p style="color:#8b949e; font-size:11px; margin:4px 0 8px;">id: ${escapeHtml(node.id)}</p>
+        <dt>tags</dt><dd>${tagsHtml || '<span class="empty">(无 tag)</span>'}</dd>
+        <dl>${metaHtml}</dl>
+      `;
+    }
+
+    function renderDetailError(node, err) {
+      $detail.innerHTML = `
+        <h2>${escapeHtml(node.id())}</h2>
+        <p style="color:#f85149;">加载失败：${escapeHtml(err)}</p>
+      `;
+    }
+
+    function renderDetailEmpty() {
+      $detail.innerHTML = '<h2>详情</h2><p class="empty">点击左侧图谱中的节点查看元数据。</p>';
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[c]);
+    }
+
+    function updateStats(graph) {
+      const nodes = graph.count ? graph.count.nodes : graph.nodes.length;
+      const edges = graph.count ? graph.count.edges : graph.edges.length;
+      $stats.textContent = `(${nodes} nodes / ${edges} edges)`;
+    }
+
+    function updateSource(graph) {
+      $sourceLabel.textContent = `source: ${graph.source || '?'}`;
+    }
+
+    // === Actions ===
+    async function loadInitial() {
+      try {
+        const graph = await fetchGraph();
+        state.currentGraph = graph;
+        state.allTags = collectTags(graph);
+        updateSource(graph);
+        updateStats(graph);
+        renderTagList();
+        state.cy = initCytoscape(graph);
+      } catch (e) {
+        $sourceLabel.textContent = 'load error: ' + e;
+        console.error(e);
+      }
+    }
+
+    async function applyFilter() {
+      const tag = ($tagInput.value || '').trim();
+      state.currentFilter = tag;
+      try {
+        const graph = tag ? await fetchFilter(tag) : await fetchGraph();
+        // 不重建 cy，只更新 elements（保留视图状态）
+        if (state.cy) {
+          state.cy.elements().remove();
+          state.cy.add([...graph.nodes, ...graph.edges]);
+          state.cy.layout({ name: 'cose', animate: false }).run();
+        }
+        updateStats(graph);
+        updateSource(graph);
+        renderTagList();
+      } catch (e) {
+        alert('筛选失败: ' + e);
+      }
+    }
+
+    function clearFilter() {
+      $tagInput.value = '';
+      state.currentFilter = '';
+      applyFilter();
+    }
+
+    // === Bind ===
+    $btnApply.addEventListener('click', applyFilter);
+    $btnClear.addEventListener('click', clearFilter);
+    $tagInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') applyFilter();
+    });
+
+    // === Boot ===
+    loadInitial();
+  </script>
+</body>
+</html>
