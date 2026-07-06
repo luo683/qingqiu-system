@@ -136,6 +136,36 @@
   - main `df8ea3a` push 到 origin
   - 4 个旧 slice 分支全删（worktree + 本地 + origin）
   - 见 [docs/handoffs/2026-07-06-day2.md](./docs/handoffs/2026-07-06-day2.md)
+- **🆕 第三天：4 slices 完整收官 + CI loop**（2026-07-06 12:14）
+  - **S2.2 Router 意图识别**（2026-07-06）：`src/qingqiu/router/`
+    - Intent 枚举（18 个）+ RuleBasedClassifier（regex + 中文友好 lookbehind/ahead）+ LLMClassifier（异步 + JSON 解析容错）
+    - IntentClassifier 主类：规则 → LLM → UNKNOWN fallback
+    - 28 测试 + 10 指令真跑 100%（rule only 10/10 + LLM mock 10/10）
+    - 证据：[docs/verification/S2.2_router.log.md](./docs/verification/S2.2_router.log.md)
+    - commit `9340f21` on `slice/S2.2` → merged `638577c`
+  - **S2.5 CLI confirm ask/test**（2026-07-06）：`src/qingqiu/cli/confirm.py`
+    - Confirm CLI 子命令（ask/test）+ 接 S5.1 Confirm 框架
+    - 11 测试 + 真跑 268/268
+    - 证据：[docs/verification/S2.5_confirm_cli.log.md](./docs/verification/S2.5_confirm_cli.log.md)
+    - commit `b3bebd3` on `slice/S2.5` → merged `34f6c50`
+  - **S6.5 人格加载 + 热更新**（2026-07-06）：`src/qingqiu/personality.py`
+    - personality.yaml 加载 + watchdog 热更新
+    - 10 测试 + 真跑 271/271
+    - 证据：[docs/verification/S6.5_personality.log.md](./docs/verification/S6.5_personality.log.md)
+    - commit `69bc391` on `slice/S6.5` → merged `73b5cd1`
+  - **S5.4 私密识别**（2026-07-06）：`src/qingqiu/security/private_detect.py`
+    - PrivateMatchType（FILENAME/CONTENT_REGEX/DIRECTORY）+ PrivateDetector（31 文件 glob + 7 内容 regex 含 GB 11643-1999 身份证校验位 + 5 私密目录）
+    - detect_file / detect_content / is_private_path / detect 接口
+    - 32 测试 + 真跑 342/342（worktree）→ 合并后 main 395/395 PASS
+    - 证据：[docs/verification/S5.4_private_detect.log.md](./docs/verification/S5.4_private_detect.log.md)
+    - commit `1289539` on `slice/S5.4` → merged `5999fd6`
+  - **合并策略**（决策 D-027）：按依赖顺序 S2.2 → S2.5 → S6.5 → S5.4（独立模块无冲突）
+  - **CI Loop cron**（决策 D-026，回应用户原话"设置loop反复检查并跑通项目"）：
+    - `mavis cron self ci-loop --every 30m --ttl 14d`
+    - 每 30min 跑 `uv run pytest tests/ -q`，失败 → 自动修或 spawn coder；PASS → 写 `docs/verification/ci-loop-<date>.log`
+    - 自动到期 2026-07-20
+  - **🆕 day3 handoff**：[docs/handoffs/2026-07-06-day3.md](./docs/handoffs/2026-07-06-day3.md)
+  - 见 [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) S2.2 / S2.5 / S5.4 / S6.5
 
 ---
 

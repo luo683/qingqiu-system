@@ -1,7 +1,7 @@
 # PROJECT · 清秋项目状态
 
-> **状态：** v0.3.0 · 立项完成 · **M1 完成（5/5 切片）**
-> **最后更新：** 2026-07-05 21:55
+> **状态：** v0.3.0 · 立项完成 + **M1 ✅ 5/5** + **S2.1 / S5.1 / S5.2 / S5.3 / S2.2 / S2.5 / S6.5 / S5.4 真跑落地**
+> **最后更新：** 2026-07-06 12:14
 > **作者：** Mavis
 > **本文件性质：** 项目"快照"。**状态变化、决策、下一步**都写在这里。每次 session 开始 / 结束时更新。
 
@@ -9,7 +9,7 @@
 
 ## 1. 一句话状态
 
-**清秋 v0.3.0 立项完成 + M1 收官 + S2.1 完整 + S5.2 + S5.3 + S5.1 真跑落地**。9 切片完成 / 39 切片剩余 / 远端 main 包含所有 S2.1/S5.x commits / 257/257 测试 PASS。
+**清秋 v0.3.0 + 13 切片完成（M1 + S2.1 + S2.2 + S2.5 + S5.1+S5.2+S5.3+S5.4 + S6.1 + S6.5）**。35 切片剩余 / 395/395 测试 PASS / CI Loop 每 30min 自动跑通 / 远端 main `5999fd6`。
 
 ---
 
@@ -19,12 +19,13 @@
 |------|------|
 | **PRD** | v0.2.2 已冻结 |
 | **架构** | v0.3.0 · 五层架构 + 48 切片路径清晰 |
-| **代码** | ~3700 行（src/qingqiu/ + llm/ + config/ + observability/ + memory/ + security/ + cli/ 子模块） |
-| **测试** | **257 个 pytest 全通过**（新增 48：S5.1 = 22，S5.2 = 26） |
-| **文档** | 11 份核心 + 5 份 references/ + 7 份真跑证据 = 23 份 + handoff × 2 |
-| **里程碑** | M0 ✅ / **M1 ✅ 5/5** / M2 1/6 / **M5 3/6**（S5.1+S5.2+S5.3）/ M3-M4-M6-M7-M10 pending |
-| **当前切片** | ✅ **S5.1 Confirm 框架真跑落地** · 下一个：S5.4（私密识别 Detect） |
-| **仓库** | ✅ GitHub：`https://github.com/luo683/qingqiu-system` · main `df8ea3a` |
+| **代码** | ~5500 行（src/qingqiu/ 8 模块 + router/ + personality/ + cli 9 文件 + security 4 文件） |
+| **测试** | **395 个 pytest 全通过**（比 day2 +138：S2.2=28, S2.5=11, S6.5=14, S5.4=32） |
+| **文档** | 11 份核心 + 5 份 references/ + **11 份真跑证据** + 3 份 handoff（day1+day2+day3） |
+| **里程碑** | M0 ✅ / **M1 ✅ 5/5** / **M2 3/6**（S2.1+S2.2+S2.5）/ **M5 4/5**（S5.1+S5.2+S5.3+S5.4）/ **M6 2/3**（S6.1+S6.5）/ M3-M4-M7-M10 pending |
+| **当前切片** | ✅ **Day 3 全部完成**（S2.2 + S2.5 + S6.5 + S5.4 merged to main）· CI Loop 已设 |
+| **仓库** | ✅ GitHub：`https://github.com/luo683/qingqiu-system` · main `5999fd6` |
+| **CI Loop** | ✅ `ci-loop` cron · 每 30min 自动 `uv run pytest tests/` · TTL 14d 到 2026-07-20 |
 
 ---
 
@@ -48,15 +49,23 @@
 | **S1.4** | 日志系统（loguru + 滚动 + 错误分流 + CLI 集成 + 6 测试 + 5 命令真跑 PASS） |
 | **S1.5** | Memory 四层骨架（L0 内存 / L1 项目 MD / L2 用户 MD / L3 SQLite + facade + 32 测试 + 4 步真跑 PASS） |
 | **M1 收官** | 5/5 切片完成 · 119 测试通过 · 5 份真跑证据归档 |
+| **S2.1** | CLI 子命令骨架（memory/task/status/config/llm + 9 文件 + 57 测试 + 12 步真跑 PASS） |
+| **S5.1** | Confirm 写入前通用框架（Prompter + CLIPrompter + Confirm + ask + 22 测试 + 10 步真跑 PASS） |
+| **S5.2** | 目录白名单（4 目录 + is_whitelisted/check_path/resolve + 26 测试 + 6 步真跑 PASS） |
+| **S5.3** | 危险操作黑名单（SHELL_PATTERNS regex + OperationType enum + 38 测试 + 8 步真跑 PASS） |
+| **S6.1** | 人格 prompt 模板（基础结构 + 加载接口） |
+| **S2.2** | Router 意图识别（18 Intent + RuleBased + LLM fallback + 中文友好 + 28 测试 + 10 指令 100%） |
+| **S2.5** | CLI confirm ask/test 子命令（接 S5.1 Confirm 框架 + 11 测试 + 268/268 真跑 PASS） |
+| **S6.5** | 人格 personality.yaml + 热更新（watchdog + 10 测试 + 271/271 真跑 PASS） |
+| **S5.4** | 私密识别 Detect（filename + content + directory + GB 11643-1999 身份证校验位 + 32 测试 + 342/342 真跑 PASS） |
+| **Day 3 收官** | 4 slices merged（S2.2/S2.5/S6.5/S5.4）+ main 395/395 PASS + CI Loop cron 设置 ✅ |
 
 ### 3.2 进行中 🔄
 
 | 任务 | 状态 |
 |------|------|
-| **Git 首次推送** | ✅ **完成**：15 commits → `luo683/qingqiu-system` main 分支 |
-| **S2.1 设计** | ✅ **完成**：[docs/slices/S2.1_router_design.md](./docs/slices/S2.1_router_design.md) · review 通过 |
-| **S2.1 完整实施** | ✅ **完成 100%** + 已合 main（merge commit `a0cb7f0`） |
-| **S2.2 router 意图识别** | 待开始（3d 估时，LLM JSON mode + 规则兜底） |
+| **CI Loop** | ✅ `ci-loop` cron 每 30min 自动 `uv run pytest tests/`，TTL 14d 到 2026-07-20 |
+| **5 个旧 slice 分支清理** | ✅ 全部删除（worktree + 本地 + origin） |
 
 ### 3.3 待办 📋
 
@@ -103,16 +112,18 @@
 
 ## 5. 下一步（**最重要的章节**）
 
-### 5.1 立即（**等你跑完 Git 推送**）
+### 5.1 立即（**Day 3 之后 · 下一刀**）
 
-**S1.1 · 项目骨架 + pyproject.toml + CLI 骨架**
+**Day 3 已完成**：S2.2 + S2.5 + S6.5 + S5.4 全部 merged to main（`5999fd6`）+ CI Loop 启用。
 
-- [ ] 你完成 Git 首次推送（见下方"Git 推送步骤"）
-- [ ] 你确认 CLI 命名 `qingqiu`（issue #3）
-- [ ] 你授权开 S1.1
-- [ ] 我创建切片分支 `slice/S1.1`
-- [ ] 我写 pyproject.toml / 目录结构 / 第一个 CLI 骨架
-- [ ] 跑 `qingqiu --version` 验证骨架
+**下一步（M2 剩余 + M5 收尾）**：
+
+- [ ] **S5.5** · 敏感字段加密（KDF + AES-GCM + 32 测试 + 真跑 PASS）· M5 最后一块
+- [ ] **S2.3** · Planner 任务拆解（DAG + 依赖图 + 30 测试）· 接 S2.2 Intent
+- [ ] **S2.4** · Executor 任务执行（按 Intent 路由到 coder/reviewer/info/life agent）
+- [ ] **S2.6** · Long-term Scheduler（cron-like 调度器）
+- [ ] CI Loop 自动跑出结果后，排查任何偶发失败
+- [ ] 决定 Day 4 是否继续开切片（看 user 优先级）
 
 ### 5.2 短期（M1 范围 · 1-2 周）
 
@@ -150,6 +161,15 @@ Obsidian 接入 + 知识图谱 UI + 自我成长 + 持续打磨。
 | D-016 | 2026-07-05 | **S2.1 核心实施 40%**：CLI 子命令骨架 | cli/ 包拆分（4 个新文件）+ errors 体系 + output human/json + memory 子命令接 S1.5 + 25 测试 + 10 步真跑 PASS · 139/139 全量不回归 · 分支 `slice/S2.1` 待 push |
 | D-017 | 2026-07-05 | **Git 首次推送成功**（PAT 缓存自动认证） | `git remote add` + `git push -u` 一次性完成 · 16 commits 到 `luo683/qingqiu-system` main |
 | D-018 | 2026-07-05 | **S2.1 完整实施 100%**：CLI 子命令骨架全部就位 | cli/ 包 8 文件 + memory/task/status 三个完整子命令 + config/llm 拆分 + 57 测试 + 12 步真跑 PASS · 171/171 全量不回归 · 分支 `slice/S2.1` |
+| D-019 | 2026-07-06 | **agent 假报告教训**：agent "完成" ≠ 真完成 | 必须 `git log` + `git status` + pytest 三件套验证；S5.2 agent 曾在 default workspace 伪造 commit，被发现后纠正 |
+| D-020 | 2026-07-06 | **mavis spawn 长中文截断 workaround** | spawn content 截断 >1KB 中文 → 短 ASCII 指令 + workspace JSON 文件 + agent 自己 Read |
+| D-021 | 2026-07-06 | **Day 2 合并 3 slices + S5.1 框架** | S2.1/S5.2/S5.3 → main；fix `BLOCKED_OPERATIONS` import 名（不是 `BLACKLIST_`）；S5.1 Confirm 22 测试 + 10 步真跑；257/257 PASS；main `df8ea3a` |
+| D-022 | 2026-07-06 | **S5.1 Confirm 通用框架合并到 main** | Prompter/CLIPrompter/Confirm 集成点：S2.4/S5.4/S3.5/S4.4 |
+| D-023 | 2026-07-06 | **S5.1 实施完成 + 真跑验证** | 22 测试 + 10 步真跑（CLI ask/test 端到端） |
+| D-024 | 2026-07-06 | **Day 2 收尾** + day2 handoff 写完 | docs/handoffs/2026-07-06-day2.md |
+| D-025 | 2026-07-06 | **S2.2 Router 实施完成**：18 Intent + Rule + LLM fallback | 28 测试 + 10 指令真跑 100%；中文友好用 `(?<![a-zA-Z0-9_])` lookbehind/ahead（不是 `\b`） |
+| D-026 | 2026-07-06 | **CI Loop cron 设置**：用户原话"设置loop反复检查并跑通项目" | `mavis cron self ci-loop --every 30m --ttl 14d`；自动到期 2026-07-20；失败时自动修或 spawn coder |
+| D-027 | 2026-07-06 | **Day 3 合并策略**：S2.2 → S2.5 → S6.5 → S5.4 顺序 | 独立模块无冲突；最终 main `5999fd6`；395/395 PASS |
 
 ---
 
