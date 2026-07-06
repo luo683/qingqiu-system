@@ -117,52 +117,47 @@
 
 ## 5. 下一步（**最重要的章节**）
 
-### 5.1 当前（v1.0 FINAL · 2026-07-06）
+### 5.1 当前（v1.0 FINAL · 2026-07-06）· **本地使用模式**
 
 **Day 6 v3 完成（🏆 48/48 切片收官）**：
 - ✅ S2.3 Planner 完整 DAG（topological_sort + parallel_groups + cycle 检测 + mermaid · 16 测试）
 - ✅ S3.3 PiperTTS 接口（11 测试 + 系统 TTS 真跑 + 150KB WAV 输出）
 - ✅ S4.4 飞书按钮 Confirm（InteractiveMessage v2 schema + dispatcher + E2E · 14 测试）
 - ✅ S9.1 Tauri 桌面编译（完整 exe + MSI + NSIS bundle · 48/48 收官）
-- ✅ main `7ea27b8` · 817/817 PASS · push origin
+- ✅ main `84ac653` · 817/817 PASS · push origin
 - ✅ 5 个发行包就位（3.1MB exe + 1.5MB MSI + 1.1MB NSIS + 127KB wheel + 626KB sdist）
 
-**用户原话**："最后一个切片一起完成了" → **已交付**。
+**用户原话 (2026-07-06 21:00)**："我不想发布，我只想在本地使用" → **撤销发布计划，改为本地使用模式**
 
-**v1.0 已竣工，可选 v1.1 收尾**：
+**v1.0 已竣工** · **本地使用（不发布）**：
 
-- [ ] **PyPI 发布**（需用户给 PyPI token）
-  - [ ] pyproject.toml license 字段（MIT/Apache2/Proprietary 用户决定）
-  - [ ] 加 `LICENSE` 文件
-  - [ ] `uv publish` 或 `twine upload dist/*`
-- [ ] **GitHub Release tag v1.0.0**
-  - [ ] `gh release create v1.0.0` + 上传 5 个 artifacts
-  - [ ] RELEASE-v1.0.md → GitHub Release body
-- [ ] **跨平台 Tauri**（Linux .deb/AppImage + macOS .dmg）
-  - [ ] 需 cross-compile 工具链（Linux 用 WSL，macOS 需 OS X）
-  - [ ] v1.0.1 路线图
+- [x] ~~PyPI publish~~ — **撤销**（不发布到外部 registry）
+- [x] ~~GitHub Release tag v1.0.0~~ — **撤销**（已删除 tag `v1.0.0` 本地 + origin；已删除 cron `release-verify-v1`）
+- [x] ✅ **本地安装**（5 选项 + 1 分钟即可用）：
+  - [ ] 双击 `qingqiu_0.1.0_x64-setup.exe`（NSIS · 推荐 · 友好安装）
+  - [ ] 双击 `qingqiu_0.1.0_x64_en-US.msi`（MSI · Windows Installer）
+  - [ ] `uv pip install -e ".[dev]"`（开发者模式 · 符号链接）
+  - [ ] `uv pip install dist/qingqiu-0.3.0-py3-none-any.whl`（wheel 装）
+  - [ ] 直接运行 `qingqiu-desktop.exe`（解压即用 · 不安装）
+- [ ] **快速验证脚本**：`bash scripts/local_install_test.sh`
 
-### 5.2 收尾动作（short · 0.5 天）
+### 5.2 本地使用文档（已完成 · 需查时看）
 
-用户决定后即可做：
-- PyPI publish（5 min 操作）
-- GitHub Release tag（1 min）
-- 跨平台 bundle（1-2 小时，需下载工具链）
+- ✅ `docs/LOCAL-USAGE.md` · 本地安装/启动/卸载完整步骤
+- ✅ `RELEASE-v1.0.md` · v1.0 功能清单（已转为本地 reference 角色）
 
-### 5.3 已无需（v1.0 完成前规划的）
+### 5.3 已无需
 
-- ~~M2 收尾 S2.3~~ ✅ Day 6 v3 已升级
-- ~~M3 语音入口~~ ✅ M3 100% 完成
-- ~~M4 飞书 IM~~ ✅ M4 100% 完成
-- ~~M6 L1/L2/L3 接入~~ ✅ M6 大部分完成
-- ~~M7 持续打磨~~ ✅ Day 6 已 polish
-- ~~M8 Obsidian 接入~~ ✅ Day 5 完成
-- ~~M9 知识图谱 UI + Tauri~~ ✅ Day 6 v3 完成
+发布相关全部撤销：
+- ~~PyPI publish~~ 已撤销
+- ~~GitHub Release tag~~ 已撤销
+- ~~跨平台 Tauri~~ 暂缓（Windows 版已满足本地需求）
 
 ### 5.4 长期（M7 后续 · 不定）
 
 M7 之后的下一步（用户决定）：
-- 持续打磨 (`smoke tests` / `cross-platform` / `auto-update` / `plugin system`)
+- 持续打磨（smoke tests / cross-platform / auto-update / plugin system）
+- 跨平台 Tauri（仅当用户有跨平台需求时启动）
 
 Obsidian 接入 + 知识图谱 UI + 自我成长 + 持续打磨。
 
