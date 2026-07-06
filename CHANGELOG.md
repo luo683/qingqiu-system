@@ -8,6 +8,21 @@
 ## [Unreleased]
 
 ### Added
+- **M3 · S3.1 / S3.2 / S3.4 语音入口 MVP**（2026-07-06）
+  - `src/qingqiu/voice/recorder.py` · `Recorder` 类（sounddevice 16kHz mono PCM 录音 + WAV 保存）+ `RecorderHotkey`（Ctrl+Shift+Q / Ctrl+Alt+Q fallback）
+  - `src/qingqiu/voice/stt.py` · `STT` 类（faster-whisper 中文 small 模型 lazy load）+ `default_stt()` 工厂（env 覆盖）+ `STTError`
+  - `src/qingqiu/voice/pipeline.py` · `VoicePipeline`（wav → STT.transcribe → Executor.execute）+ `PipelineResult` 数据类 + `run_recorded(duration_sec)` 一站式录音跑流程
+  - `src/qingqiu/voice/cli.py` · `qingqiu-voice` CLI（`--file` 转写+执行 / `transcribe` 只转写 / `record` 录音 / `run-text` 跳过 STT）
+  - `src/qingqiu/voice/__main__.py` · `python -m qingqiu.voice --file <wav>` 入口
+  - 56 个 pytest 测试（recorder 16 + stt 12 + pipeline 13 + cli 9 + main_module 6）
+  - 复用 `router.executor.Executor` · `observability.logger` · `cli.output.OutputFormatter`（**零重写**）
+  - 新依赖 `sounddevice>=0.5.5` / `faster-whisper>=1.2.1` / `keyboard>=0.13.5`（pyproject.toml [project.dependencies]）
+  - `scripts/verify_m3.py` 4 场景真跑 · `docs/verification/M3_voice.log.md` 完整验收记录
+  - 全量 776/776 PASS（M3=56 + 其它切片=244，零回归）
+  - verify_m3.py 4/4 PASS：录音 3s → WAV → STT → Executor → 输出
+  - 网络降级：HuggingFace 屏蔽时 verify 自动 mock STT fallback（commit e152e94）
+  - 见 [IMPLEMENTATION-PLAN.md](./IMPLEMENTATION-PLAN.md) §M3
+  - 见 [docs/verification/M3_voice.log.md](./docs/verification/M3_voice.log.md)
 - **S4.1 / S4.2 / S4.3 · M4 飞书 IM MVP 接入**（2026-07-06）
   - `FeishuClient`（lark-oapi WebSocket + MockTransport 双模式）
   - `MessageHandler`（IM 文本 → Executor.execute → 友好提示）
