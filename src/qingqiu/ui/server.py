@@ -1,10 +1,11 @@
-"""qingqiu.ui.server · FastAPI HTTP server（M9 · S9.2）
+"""qingqiu.ui.server · FastAPI HTTP server（M9 · S9.2 + S9.5）
 
 端点：
     GET /                → 静态 web/index.html（HTML 入口）
     GET /api/graph.json  → 全图 JSON（nodes + edges + metadata）
     GET /api/nodes/{id}  → 单节点详情（找不到 → 404）
     GET /api/filter?tag=X → 按 tag 筛选（缺省 / 空 → 全图）
+    GET /api/open/{id}   → S9.5 打开 Obsidian（OS default handler）
     GET /health          → 健康检查 {ok: true, source: ...}
 
 复用 daemon/server.py 模式（FastAPI + uvicorn + StaticFiles）。
@@ -13,6 +14,9 @@
 
 from __future__ import annotations
 
+import os
+import platform
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -98,6 +102,28 @@ def create_ui_app(vault: Path | None = None) -> FastAPI:
         payload["filter_tag"] = tag
         payload["original_count"] = {"nodes": len(full.nodes), "edges": len(full.edges)}
         return payload
+
+    # === S9.5 打开 Obsidian 笔记 ===
+    @app.get("/api/open/{node_id}")
+    def open_node(node_id: str) -> dict[str, Any]:
+        """打开 vault 笔记（用 OS default handler）"""
+        node = builder.get_node(node_id)
+        if node is None or not node.path:
+            raise HTTPException(status_code=404, detail=f"node not found or no path: {node_id}")
+        path = Path(node.path)
+        if not path.exists():
+            raise HTTPException(status_code=404, detail=f"file not found: {node.path}")
+        try:
+            system = platform.system().lower()
+            if system == "windows":
+                os.startfile(str(path))  # type: ignore[attr-defined]
+            elif system == "darwin":
+                subprocess.run(["open", str(path)], check=True, timeout=5)
+            else:
+                subprocess.run(["xdg-open", str(path)], check=True, timeout=5)
+            return {"status": "opened", "path": str(path), "node_id": node_id}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"open failed: {e}") from e
 
     # === 静态文件：根路径返回 index.html ===
     @app.get("/", include_in_schema=False, response_model=None)

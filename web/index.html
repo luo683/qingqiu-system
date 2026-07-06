@@ -343,12 +343,34 @@
             `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(JSON.stringify(v))}</dd>`
           ).join('')
         : '<dd class="empty">(无 metadata)</dd>';
+      const pathRaw = node.path || (node.metadata && node.metadata.path);
+      const openBtn = pathRaw
+        ? `<button id="btn-open" data-path="${escapeHtml(pathRaw)}" data-id="${escapeHtml(node.id)}" style="margin-top:10px; padding:6px 12px; background:#238636; border:1px solid #2ea043; border-radius:6px; color:white; cursor:pointer;">在 Obsidian 中打开</button>`
+        : '<p class="empty" style="margin-top:10px;">(该节点无 path · 不可在 Obsidian 打开)</p>';
       $detail.innerHTML = `
         <h2>${escapeHtml(node.title)}</h2>
         <p style="color:#8b949e; font-size:11px; margin:4px 0 8px;">id: ${escapeHtml(node.id)}</p>
         <dt>tags</dt><dd>${tagsHtml || '<span class="empty">(无 tag)</span>'}</dd>
         <dl>${metaHtml}</dl>
+        ${openBtn}
       `;
+      const btn = document.getElementById('btn-open');
+      if (btn) {
+        btn.addEventListener('click', async () => {
+          try {
+            const r = await fetch('/api/open/' + encodeURIComponent(btn.dataset.id));
+            const j = await r.json();
+            if (r.ok) {
+              btn.textContent = '已打开 → ' + j.path;
+              btn.style.background = '#2ea043';
+            } else {
+              alert('打开失败: ' + (j.detail || r.status));
+            }
+          } catch (e) {
+            alert('网络错误: ' + e);
+          }
+        });
+      }
     }
 
     function renderDetailError(node, err) {

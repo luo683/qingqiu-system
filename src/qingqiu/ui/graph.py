@@ -127,6 +127,7 @@ class Node:
     title: str
     tags: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
+    path: str | None = None  # S9.5 · vault 文件绝对路径（用于点节点打开 Obsidian）
 
     def to_cytoscape(self) -> dict[str, Any]:
         return {
@@ -135,6 +136,7 @@ class Node:
                 "label": self.title,
                 "tags": list(self.tags),
                 "metadata": dict(self.metadata),
+                "path": self.path,
             }
         }
 
@@ -267,7 +269,7 @@ def _parse_md_file(path: Path) -> Node | None:
     summary = _summary(body)
     if summary:
         metadata["summary"] = summary
-    return Node(id=node_id, title=title, tags=tags, metadata=metadata)
+    return Node(id=node_id, title=title, tags=tags, metadata=metadata, path=str(path))
 
 
 def _scan_vault(vault: Path) -> tuple[list[Node], list[Edge]]:

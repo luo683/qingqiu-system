@@ -197,20 +197,13 @@ def _compile_regexes() -> dict[SensitiveType, re.Pattern[str]]:
 _TYPE_REGEXES: dict[SensitiveType, re.Pattern[str]] = _compile_regexes()
 
 
-# === 例外通道 env var 检查 ===
+# === 例外通道 env var 检查（S5.6 完整三档）===
 
 _INCLUDE_TTL = timedelta(hours=1)
 
 
-def _include_private_enabled() -> bool:
-    """检查 ``QINGQIU_INCLUDE_PRIVATE`` 是否启用（含 1h TTL）。
-
-    格式：
-      - ``QINGQIU_INCLUDE_PRIVATE=1`` → 启用，无 TTL（用户需手动 unset）
-      - ``QINGQIU_INCLUDE_PRIVATE=1;ts=<ISO8601>`` → 启用，1h 后自动失效
-      - ``QINGQIU_INCLUDE_PRIVATE=0`` / 未设 → 禁用
-    """
-    raw = os.getenv("QINGQIU_INCLUDE_PRIVATE", "").strip()
+def _parse_ttl(raw: str, ttl: timedelta) -> bool:
+    """通用 TTL 解析（QINGQIU_X=1;ts=<ISO8601> 形式）"""
     if not raw:
         return False
     parts = raw.split(";")
@@ -225,14 +218,47 @@ def _include_private_enabled() -> bool:
                 ts = datetime.fromisoformat(v)
             except ValueError:
                 return False
-            if datetime.now() - ts > _INCLUDE_TTL:
+            if datetime.now() - ts > ttl:
                 return False
     return True
 
 
+def _include_private_enabled() -> bool:
+    """``QINGQIU_INCLUDE_PRIVATE`` 是否启用（含 1h TTL）。
+
+    格式：
+      - ``=1`` → 启用，无 TTL（用户需手动 unset）
+      - ``=1;ts=<ISO8601>`` → 启用，1h 后自动失效
+      - ``=0`` / 未设 → 禁用
+    """
+    return _parse_ttl(os.getenv("QINGQIU_INCLUDE_PRIVATE", ""), _INCLUDE_TTL)
+
+
 def _redact_only_enabled() -> bool:
-    """检查 ``QINGQIU_REDACT_ONLY=1`` 是否启用"""
-    return os.getenv("QINGQIU_REDACT_ONLY", "").strip() == "1"
+    """``QINGQIU_REDACT_ONLY=1`` 是否启用（含 1h TTL）"""
+    return _parse_ttl(os.getenv("QINGQIU_REDACT_ONLY", ""), _INCLUDE_TTL)
+
+
+def _private_send_enabled() -> bool:
+    """``QINGQIU_PRIVATE_SEND=1`` 是否启用（S5.6 私密发送通道 · 含 1h TTL）
+
+    格式同 INCLUDE_PRIVATE。
+    """
+    return _parse_ttl(os.getenv("QINGQIU_PRIVATE_SEND", ""), _INCLUDE_TTL)
+
+
+def get_exception_channel() -> str:
+    """返回当前激活的例外通道（None = 无 / "include" / "redact" / "private_send"）
+
+    优先级：private_send > include > redact
+    """
+    if _private_send_enabled():
+        return "private_send"
+    if _include_private_enabled():
+        return "include"
+    if _redact_only_enabled():
+        return "redact"
+    return "none"
 
 
 # === 主检测器 ===
