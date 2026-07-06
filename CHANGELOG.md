@@ -159,6 +159,16 @@
     - 32 测试 + 真跑 342/342（worktree）→ 合并后 main 395/395 PASS
     - 证据：[docs/verification/S5.4_private_detect.log.md](./docs/verification/S5.4_private_detect.log.md)
     - commit `1289539` on `slice/S5.4` → merged `5999fd6`
+  - **S5.5 私密处理 Block + Redact**（2026-07-06 · 含 S5.6 例外通道）：`src/qingqiu/security/sensitive.py`
+    - SensitiveType 7 类（id_card / phone / email / card / aws_key / github_token / jwt）+ SensitiveField（type + value + masked）
+    - PrivateDetectResult（matches + has_private + iterable + len）
+    - SensitiveDetector.check_text / check_file / classify / redact_text
+    - REDACT_PATTERNS 7 项：id_card `110105****002X` · phone `138****8000` · email `rog***@qq.com` · card `****-****-****-0123` · token `XXXX****YYYY`
+    - BlockHandler（命中 → 抛 SensitiveBlockError / NotFoundError 子类 · code=1）+ RedactHandler（命中 → masked 文本）
+    - 例外通道：`QINGQIU_INCLUDE_PRIVATE=1[;ts=<ISO8601>]`（1h TTL）+ `QINGQIU_REDACT_ONLY=1`
+    - 中英混合识别（classify / check_text 不区分上下文语言）
+    - 60 单元测试 + 12 场景真跑 22/22 PASS · 全量回归 455/455 PASS
+    - 证据：[docs/verification/S5.5_sensitive.log.md](./docs/verification/S5.5_sensitive.log.md)
   - **合并策略**（决策 D-027）：按依赖顺序 S2.2 → S2.5 → S6.5 → S5.4（独立模块无冲突）
   - **CI Loop cron**（决策 D-026，回应用户原话"设置loop反复检查并跑通项目"）：
     - `mavis cron self ci-loop --every 30m --ttl 14d`

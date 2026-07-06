@@ -3,6 +3,8 @@
 S5.1 阶段：confirm（写入前 Confirm 框架）
 S5.2 阶段：whitelist（白名单）
 S5.3 阶段：blacklist（黑名单）
+S5.4 阶段：private_detect（私密识别 Detect）
+S5.5 阶段：sensitive（私密处理 Block + Redact）
 """
 
 from qingqiu.security.blacklist import (
@@ -23,6 +25,17 @@ from qingqiu.security.confirm import (
     Prompter,
     ask,
     get_default_confirm,
+)
+from qingqiu.security.sensitive import (
+    REDACT_PATTERNS,
+    SENSITIVE_TYPES,
+    BlockHandler,
+    PrivateDetectResult,
+    RedactHandler,
+    SensitiveBlockError,
+    SensitiveDetector,
+    SensitiveField,
+    SensitiveType,
 )
 from qingqiu.security.whitelist import (
     WHITELIST_DIRS,
@@ -56,4 +69,14 @@ __all__ = [
     "ConfirmTimeout",
     "ask",
     "get_default_confirm",
+    # sensitive (S5.5)
+    "REDACT_PATTERNS",
+    "SENSITIVE_TYPES",
+    "BlockHandler",
+    "PrivateDetectResult",
+    "RedactHandler",
+    "SensitiveBlockError",
+    "SensitiveDetector",
+    "SensitiveField",
+    "SensitiveType",
 ]
