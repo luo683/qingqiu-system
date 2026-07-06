@@ -17,6 +17,7 @@ from loguru import logger as loguru_logger
 
 from qingqiu import __version__
 from qingqiu.cli.config import build_parser as build_config_parser
+from qingqiu.cli.confirm import build_parser as build_confirm_parser
 from qingqiu.cli.errors import CLIError
 from qingqiu.cli.llm import build_parser as build_llm_parser
 from qingqiu.cli.memory import build_parser as build_memory_parser
@@ -39,6 +40,7 @@ def build_parser() -> argparse.ArgumentParser:
             "  task <action>         任务管理（M2.6）\n"
             "  memory <action>       记忆管理（L0/L1/L2/L3）\n"
             "  status                健康状态\n"
+            "  confirm <action>      Confirm 询问（CLI/TUI 适配 S5.1）\n"
             "  config <action>       配置\n"
             "  llm <action>          LLM provider\n"
             "\n"
@@ -82,6 +84,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     # memory（接 S1.5 facade）
     build_memory_parser(subparsers)
+
+    # confirm（接 S5.1 Confirm 框架 · S2.5）
+    build_confirm_parser(subparsers)
 
     # config
     build_config_parser(subparsers)
