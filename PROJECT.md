@@ -9,7 +9,7 @@
 
 ## 1. 一句话状态
 
-**清秋 v0.3.0 立项完成**：8 份核心文档齐备 + 5 份 references/ 前端标准骨架齐备 + 目录迁移完成 + **GitHub 仓库已确认** + **M1 全部完成（5/5）**：S1.1 / S1.2 / S1.3 / S1.4 / S1.5 全部真跑落地。下一个里程碑：**M2 · CLI + Router**（S2.1-S2.6，2-3 周）。
+**清秋 v0.3.0 立项完成 + M1 收官 + S2.1 完整 + S5.2 + S5.3 + S5.1 真跑落地**。9 切片完成 / 39 切片剩余 / 远端 main 包含所有 S2.1/S5.x commits / 257/257 测试 PASS。
 
 ---
 
@@ -19,12 +19,12 @@
 |------|------|
 | **PRD** | v0.2.2 已冻结 |
 | **架构** | v0.3.0 · 五层架构 + 48 切片路径清晰 |
-| **代码** | ~2900 行（src/qingqiu/ + llm/ + config/ + observability/ + memory/ 子模块） |
-| **测试** | **119 个 pytest 全通过**（32 个 S1.5 新增） |
-| **文档** | 11 份核心 + 5 份 references/ 标准 + 5 份真跑证据 = 21 份 |
-| **里程碑** | M0 ✅ / **M1 完成（5/5）** / **M2 待开始** / M3-M10 pending |
-| **当前切片** | ✅ **S1.5 真跑落地完成（M1 收官）** · 下一个：S2.1（M2 起步） |
-| **仓库** | ✅ GitHub URL 已确认：`https://github.com/luo683/qingqiu-system` |
+| **代码** | ~3700 行（src/qingqiu/ + llm/ + config/ + observability/ + memory/ + security/ + cli/ 子模块） |
+| **测试** | **257 个 pytest 全通过**（新增 48：S5.1 = 22，S5.2 = 26） |
+| **文档** | 11 份核心 + 5 份 references/ + 7 份真跑证据 = 23 份 + handoff × 2 |
+| **里程碑** | M0 ✅ / **M1 ✅ 5/5** / M2 1/6 / **M5 3/6**（S5.1+S5.2+S5.3）/ M3-M4-M6-M7-M10 pending |
+| **当前切片** | ✅ **S5.1 Confirm 框架真跑落地** · 下一个：S5.4（私密识别 Detect） |
+| **仓库** | ✅ GitHub：`https://github.com/luo683/qingqiu-system` · main `df8ea3a` |
 
 ---
 
@@ -55,7 +55,7 @@
 |------|------|
 | **Git 首次推送** | ✅ **完成**：15 commits → `luo683/qingqiu-system` main 分支 |
 | **S2.1 设计** | ✅ **完成**：[docs/slices/S2.1_router_design.md](./docs/slices/S2.1_router_design.md) · review 通过 |
-| **S2.1 完整实施** | ✅ **完成 100%**（分支 `slice/S2.1`）：cli/ 包拆分 8 个文件 + errors + output + memory/task/status/config/llm 子命令 + 57 测试 + 12 步真跑 PASS · 171/171 全量不回归 |
+| **S2.1 完整实施** | ✅ **完成 100%** + 已合 main（merge commit `a0cb7f0`） |
 | **S2.2 router 意图识别** | 待开始（3d 估时，LLM JSON mode + 规则兜底） |
 
 ### 3.3 待办 📋
@@ -224,10 +224,11 @@ git push -u origin main
 
 ## 9. 下次 session 必读
 
-1. **🔥 [docs/handoffs/2026-07-05-day1.md](./docs/handoffs/2026-07-05-day1.md)** — 第一天完整 handoff（进度 + 决策 + 经验 + TODO）· 必读
-2. [README.md](./README.md) — 文档地图
-3. [PROJECT.md](./PROJECT.md)（本文）— 当前状态
-4. [ARCH.md](./ARCH.md) §10 — 开发纪律
+1. **🔥 [docs/handoffs/2026-07-06-day2.md](./docs/handoffs/2026-07-06-day2.md)** — 第二天完整 handoff（合 main + S5.1 + 经验）
+2. [docs/handoffs/2026-07-05-day1.md](./docs/handoffs/2026-07-05-day1.md) — 第一天
+3. [README.md](./README.md) — 文档地图
+4. [PROJECT.md](./PROJECT.md)（本文）— 当前状态
+5. [ARCH.md](./ARCH.md) §10 — 开发纪律
 
 ---
 

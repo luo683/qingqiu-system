@@ -120,6 +120,22 @@
   - 项目主仓库切换到 main + cherry-pick handoff → push `e7966d5` 到 origin/main
   - PROJECT.md §9 加 handoff 链接（启动 session 必读）
   - cron `s5-check` 删除（S5.x 都完成且 push）
+- **🆕 第二天：合并 3 个 slice 分支 + S5.1**（2026-07-06 11:51）
+  - `git merge --no-ff slice/S2.1` → `a0cb7f0`（CLI 子命令骨架）
+  - `git merge --no-ff slice/S5.2` → `2f012a4`（目录白名单）
+  - `git merge --no-ff slice/S5.3` → `e4de7bc`（黑名单 · 解决 __init__.py 冲突）
+  - fix：`BLOCKED_OPERATIONS` 不是 `BLACKLIST_OPERATIONS`（agent 笔误）
+  - 235/235 PASS（合并后）
+  - **S5.1 Confirm 通用框架**：`src/qingqiu/security/confirm.py`
+    - Prompter 抽象 + CLIPrompter (y/N/diff + 后台线程超时)
+    - Confirm 包装 (60s default) + ConfirmRejected (code=1) + ConfirmTimeout
+    - ask() 便捷函数 + get_default_confirm() 单例
+    - 22 个测试 + 10 步真跑验证 + docs/verification/S5.1_confirm.log.md
+    - 集成点：S2.4 / S5.4 / S3.5 / S4.4
+  - 257/257 PASS（最终）
+  - main `df8ea3a` push 到 origin
+  - 4 个旧 slice 分支全删（worktree + 本地 + origin）
+  - 见 [docs/handoffs/2026-07-06-day2.md](./docs/handoffs/2026-07-06-day2.md)
 
 ---
 
