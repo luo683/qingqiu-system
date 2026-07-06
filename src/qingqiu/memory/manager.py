@@ -81,6 +81,27 @@ class Memory:
             all_keys.update(lyr.list_keys())
         return sorted(all_keys)
 
+    def search(self, query: str, layer: str | None = None) -> list[dict]:
+        """跨层按 query 搜 key 或 value（P0-6 实装）
+
+        Returns:
+            [{"key": ..., "value": ..., "layer": "L0|L1|L2|L3"}, ...]
+        """
+        results: list[dict] = []
+        layers_to_search = (
+            [self._find_layer(layer)] if layer else list(self._layers)
+        )
+        for lyr in layers_to_search:
+            for key in lyr.list_keys():
+                value = lyr.get(key)
+                if query in key or (value and query in value):
+                    results.append({"key": key, "value": value, "layer": lyr.name})
+        return results
+
+    def stats(self) -> dict:
+        """每层统计（P0-6 实装）"""
+        return {lyr.name: {"keys": len(lyr.list_keys())} for lyr in self._layers}
+
     def _find_layer(self, name: str) -> MemoryLayer:
         for layer in self._layers:
             if layer.name == name:

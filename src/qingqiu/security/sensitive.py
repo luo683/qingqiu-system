@@ -49,6 +49,53 @@ SENSITIVE_TYPES: tuple[SensitiveType, ...] = tuple(SensitiveType)
 """所有敏感类型（按优先级排序 · 检测/脱敏顺序）。"""
 
 
+# === 通道枚举（S5.6）===
+
+class Channel(str, Enum):
+    """私密信息通道 · 控制 Block/Redact/Allow 行为"""
+
+    BLOCK = "block"  # 默认：命中即 Block（exit 1）
+    REDACT = "redact"  # 命中即脱敏后输出
+    PRIVATE_SEND = "private_send"  # S5.6：私密发送（强制 include_private + audit log）
+
+
+def private_send_check(text: str, detector, audit_log=None) -> str:
+    """私密发送通道：强制 require include_private 例外 + 写 audit log
+
+    Args:
+        text: 待发送内容
+        detector: SensitiveDetector 实例
+        audit_log: 可选 audit log 写入路径
+
+    Returns:
+        原 text（如开启 include_private 例外）或 raises SensitiveBlockError
+    """
+    result = detector.check_text(text)
+    if not result.has_private:
+        return text
+
+    # 私密发送强制 require INCLUDE_PRIVATE 例外
+    from qingqiu.security.sensitive import _include_private_enabled
+
+    if not _include_private_enabled():
+        raise SensitiveBlockError(
+            f"private_send 检测到 {len(result.matches)} 个私密字段，"
+            f"需先设置 QINGQIU_INCLUDE_PRIVATE=1;ts=<ISO8601> 开启例外（1h TTL）"
+        )
+
+    # 写 audit log
+    if audit_log:
+        from datetime import datetime
+
+        Path(audit_log).parent.mkdir(parents=True, exist_ok=True)
+        with Path(audit_log).open("a", encoding="utf-8") as f:
+            ts = datetime.now().isoformat(timespec="seconds")
+            types = ",".join(m.match_type for m in result.matches)
+            f.write(f"[{ts}] private_send types={types} len={len(text)}\n")
+
+    return text
+
+
 # === 异常 ===
 
 class SensitiveBlockError(NotFoundError):

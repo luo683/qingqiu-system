@@ -8,6 +8,7 @@ S2.4 Executor（IMPLEMENTATION-PLAN §M2 · S2.4）
 
 from __future__ import annotations
 
+import asyncio
 import re
 import shlex
 from dataclasses import dataclass, field
@@ -18,6 +19,7 @@ from qingqiu.cli.memory import run_memory_get, run_memory_list, run_memory_set
 from qingqiu.cli.output import OutputFormatter
 from qingqiu.cli.status import run_status
 from qingqiu.cli.task import run_task_add, run_task_done, run_task_list, run_task_show
+from qingqiu.llm import Message, get_provider
 from qingqiu.router.classifier import ClassificationResult, IntentClassifier
 from qingqiu.router.intent import Intent
 
@@ -265,3 +267,57 @@ def run_ask(args: Any, out: OutputFormatter, llm_provider=None) -> int:
 
     executor = Executor(llm_provider=llm_provider, use_llm=False)
     return executor.execute(text, out)
+
+
+# === P0-1 ASK → LLM 真实回答（v1.0 实装） ===
+
+def _get_default_llm_provider():
+    """从 ConfigManager 拿默认 LLM provider（失败返 None）"""
+    try:
+        from qingqiu.config.manager import ConfigManager
+
+        cfg_mgr = ConfigManager()
+        cfg_mgr.load()
+        provider_name = cfg_mgr.config.llm.default
+        provider_cfg = cfg_mgr.config.llm.providers.get(provider_name, {})
+        return get_provider(provider_name, **provider_cfg)
+    except Exception:
+        return None
+
+
+def ask_llm(prompt: str, out: OutputFormatter) -> int:
+    """`qingqiu ask_llm "<question>"` — 直接调 LLM 回答问题（不走 router）"""
+    provider = _get_default_llm_provider()
+    if provider is None:
+        out.error(
+            "LLM provider 未配置或初始化失败",
+            code=2,
+            hint="qingqiu config show 看 llm.default；qingqiu llm test <provider> 测试",
+        )
+        return 2
+
+    try:
+        from qingqiu.config.manager import ConfigManager
+
+        cfg_mgr = ConfigManager()
+        cfg_mgr.load()
+        system_prompt = cfg_mgr.config.personality.system_prompt
+    except Exception:
+        system_prompt = "你是清秋，给 ROG 个人使用。"
+
+    try:
+        async def _run():
+            return await provider.complete(
+                [
+                    Message(role="system", content=system_prompt),
+                    Message(role="user", content=prompt),
+                ],
+                max_tokens=1024,
+            )
+
+        response = asyncio.run(_run())
+        out.print({"answer": response.content, "model": response.model, "provider": response.provider}, title="ask_llm")
+        return 0
+    except Exception as e:
+        out.error(f"LLM 调用失败: {type(e).__name__}: {e}", code=2)
+        return 2
