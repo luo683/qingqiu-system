@@ -8,6 +8,16 @@
 ## [Unreleased]
 
 ### Added
+- **S4.1 / S4.2 / S4.3 · M4 飞书 IM MVP 接入**（2026-07-06）
+  - `FeishuClient`（lark-oapi WebSocket + MockTransport 双模式）
+  - `MessageHandler`（IM 文本 → Executor.execute → 友好提示）
+  - `reply()` 高层入口（响应回发 + 长文本 chunk）
+  - `run_reply_loop(client, handler)` 一键串联
+  - 67 个 pytest 测试全过（client 21 + handler 18 + reply 19 + e2e 5 + integration 5）
+  - 全量 543/543 PASS（基线 476 + 增量 67，零回归）
+  - `scripts/verify_m4.py` 4 场景全过（29/29 assertions）
+  - 复用 `router.executor.Executor` · `observability.logger` · 不重复造轮子
+  - 见 [docs/verification/M4_im.log.md](./docs/verification/M4_im.log.md)
 - **🆕 验收纪律：每个 slice 必须真跑落地**（2026-07-05）
   - 创建 [VERIFICATION.md](./VERIFICATION.md) 强约束文档
   - mock 通过 ≠ 真跑通；必须真实端到端验证 + 记录证据到 `docs/verification/`
