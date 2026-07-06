@@ -5,7 +5,7 @@ S5.3 阶段：blacklist（黑名单）
 """
 
 from qingqiu.security.blacklist import (
-    BLACKLIST_OPERATIONS,
+    BLOCKED_OPERATIONS,
     SHELL_PATTERNS,
     BlacklistError,
     OperationType,
@@ -30,7 +30,7 @@ __all__ = [
     "check_path",
     "resolve",
     # blacklist (S5.3)
-    "BLACKLIST_OPERATIONS",
+    "BLOCKED_OPERATIONS",
     "SHELL_PATTERNS",
     "BlacklistError",
     "OperationType",
