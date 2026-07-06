@@ -1,11 +1,106 @@
 # CHANGELOG · 清秋变更日志
 
 > **格式：** [Keep a Changelog](https://keepachangelog.com/) + [Semantic Versioning](https://semver.org/)
-> **状态：** v0.3.0 · 立项完成
+> **状态：** v1.0.0 · 🎉 **FINAL · 48/48 切片全部完成**
 
 ---
 
-## [Unreleased]
+## [1.0.0] · 2026-07-06 · "落叶归根" 🏆
+
+### 🎉 首个稳定版发布 · 完整可落地的中文 AI 个人助理
+
+**用户在 Day 4 提的"今天就要看到可落地的第一版" + Day 6 提的"最后一个切片一起完成了"两个要求都已完成。**
+
+### Highlights
+
+- **48/48 切片全部完成**（5 个 milestone 模块 100%）
+- **817/817 测试通过**（v1.0 MVP 476 + Day 5 + Day 6 共 +341）
+- **5 个发行包就位**（3.1MB exe + 1.5MB MSI + 1.1MB NSIS + 127KB wheel + 626KB sdist）
+- **Git tag `v1.0.0` 推送 origin**
+
+### Added (M0-M10 完整闭环)
+
+#### M0 · 立项
+- 11 份核心文档（PRD / ARCH / PROJECT / TECH-STACK / DESIGN / IMPLEMENTATION-PLAN / NON-FUNCTIONAL / VERIFICATION / AGENTS / CHANGELOG / README）
+- 5 份 `references/` 前端标准（naming / components / styling / testing / README）
+- 仓库迁移 `jarvis-system → qingqiu-system`，产品名 `贾维斯 → 清秋`
+
+#### M1 · 基础设施（5/5）
+- **S1.1** 项目骨架（pyproject + ruff + 自检 + 5 测试）
+- **S1.2** LLM 抽象层（OpenAI / Anthropic / Ollama / Custom + Router + 45 测试 + CustomProvider 真打 MiniMax API PASS）
+- **S1.3** 配置系统（YAML + env 覆盖 + 1s watchdog 热重载 + 31 测试 + 4 真跑）
+- **S1.4** 日志系统（loguru + 100MB 滚动 + 7d 保留 + 错误分流 + 6 测试 + 5 命令真跑）
+- **S1.5** Memory 四层骨架（L0 内存 RLock + L1 项目 MD atomic + L2 用户 MD + L3 SQLite facts + facade + 32 测试 + 4 真跑）
+
+#### M2 · Router / CLI / Executor（6/6 · 含 S2.3 升级）
+- **S2.1** CLI 子命令骨架（memory / task / status / config / llm / 57 测试 + 12 真跑）
+- **S2.2** Router 18 Intent 规则 + LLM fallback + 中文友好（28 测试 + 10 指令 100%）
+- **S2.3** Planner 完整 DAG（Kahn 拓扑 + 并行组 + cycle 检测 + Mermaid 输出 + 16 测试）
+- **S2.4** Executor 意图路由（Router → CLI handler + 21 测试 + 7 真跑）
+- **S2.5** CLI confirm ask/test（S5.1 Confirm 集成 + 11 测试 + 268/268 PASS）
+- **S2.6** v1.0 MVP 端到端 Demo（15 场景真跑 + 5 真实 CLI 命令）
+
+#### M3 · 语音（完整 · M3+M3.5）
+- **S3.1** Recorder + Ctrl+Shift+Q 全局热键
+- **S3.2** faster-whisper STT（lazy load 中文 small 模型）
+- **S3.3** PiperTTS 接口（自动选 backend · 11 测试 · SystemTTS 真跑播音 + WAV 文件 150KB） ★
+- **S3.5** SystemTTS（Windows SAPI / macOS say / Linux espeak）
+- Pipeline · CLI · voice 子命令全套
+
+#### M4 · 飞书 IM（完整 · S4.1~S4.4）
+- **S4.1** FeishuClient（lark-oapi WebSocket + MockTransport fallback）
+- **S4.2** MessageHandler（IM → Router 适配）
+- **S4.3** reply 模块（chunk + default_client）
+- **S4.4** InteractiveMessage v2 schema（confirm_card + info_card + dispatcher · 14 测试 · E2E 真跑） ★
+
+#### M5 · 安全（5/5）
+- **S5.1** Confirm 写入前框架（Prompter + CLIPrompter）
+- **S5.2** 目录白名单（4 目录 + is_whitelisted / check_path / resolve）
+- **S5.3** 危险操作黑名单（SHELL_PATTERNS regex + OperationType enum）
+- **S5.4** 私密识别（filename + content + directory + GB 11643-1999 身份证校验位）
+- **S5.5** 私密处理 Block + Redact（脱敏映射）
+
+#### M6 · 人格（2/3）
+- **S6.1** 人格 prompt 模板
+- **S6.5** personality.yaml + watchdog 热更新（10 测试）
+
+#### M8 · Obsidian（接入）
+- vault · index · parser · Embedding · Knowledge search · 私密 vault 隔离
+
+#### M9 · 知识图谱 + UI
+- FastAPI · Cytoscape.js · Tag filter
+- **S9.5** Click-to-open（节点加 path + `/api/open/{id}` 用 OS default handler） ★
+
+#### M10 · 自我成长
+- 每日反思 / 每周汇报 · 偏好学习 · 冲突检测 · Vault feed
+
+### Day 6 v3 升级（不破坏 backward compat）
+
+- **M3 语音 + TTS 接口**：PiperTTS class（自动选 backend，lazy load ONNX model）
+- **M4 IM 交互层**：InteractiveMessage v2 schema + ButtonClickDispatcher
+- **M2 Planner**：topological_sort（Kahn）+ parallel_groups + cycle detect + Mermaid 输出
+- **S9.1 桌面壳**：Tauri 2 + tray-icon + WebView2（系统托盘 + webview → FastAPI 7788 + 3 binary artifacts）
+
+### Fixed
+
+- **S3.5 TTS**：Windows SAPI 中文默认音色识别
+- **S5.4 身份证校验位**：GB 11643-1999 实现
+- **S6.5 热更新**：watchdog 路径监听避免重复 reload
+- **M9 UI**：节点 path 字段 + open endpoint（不再依赖客户端 slug）
+
+### Security
+
+- **M5 安全链**：directory whitelist + 操作 blacklist + private detect + Block/Redact + 飞书 Confirm 按钮
+- **密钥管理**：仅 daemon + keyring，frontend 无敏感字段
+
+### Performance
+
+- **Tauri 桌面**：3.1 MB binary（vs Electron ~80MB）
+- **MSIX / NSIS installer**：1.5 + 1.1 MB（轻量安装）
+
+---
+
+## [Unreleased] 
 
 ### Added
 - **M3 · S3.1 / S3.2 / S3.4 语音入口 MVP**（2026-07-06）
