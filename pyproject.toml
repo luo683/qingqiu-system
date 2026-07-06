@@ -23,10 +23,14 @@ dependencies = [
     "uvicorn[standard]>=0.27",
     "lark-oapi>=1.7.0",
     "websockets>=15.0.1",
+    "sounddevice>=0.5.5",
+    "faster-whisper>=1.2.1",
+    "keyboard>=0.13.5",
 ]
 
 [project.scripts]
 qingqiu = "qingqiu.cli:main"
+qingqiu-voice = "qingqiu.voice.cli:main"
 
 [project.urls]
 Repository = "https://github.com/luo683/qingqiu-system"
@@ -66,3 +70,6 @@ warn_unused_ignores = true
 testpaths = ["tests"]
 addopts = "-v --strict-markers"
 asyncio_mode = "auto"
+markers = [
+    "slow: 集成 / 真模型测试，默认跳过（用 QINGQIU_RUN_SLOW=1 开启）",
+]
