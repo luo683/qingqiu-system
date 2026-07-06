@@ -18,10 +18,14 @@ dependencies = [
     "pydantic>=2.0",
     "PyYAML>=6.0",
     "loguru>=0.7.3",
+    "sounddevice>=0.5.5",
+    "faster-whisper>=1.2.1",
+    "keyboard>=0.13.5",
 ]
 
 [project.scripts]
 qingqiu = "qingqiu.cli:main"
+qingqiu-voice = "qingqiu.voice.cli:main"
 
 [project.urls]
 Repository = "https://github.com/luo683/qingqiu-system"
@@ -61,3 +65,6 @@ warn_unused_ignores = true
 testpaths = ["tests"]
 addopts = "-v --strict-markers"
 asyncio_mode = "auto"
+markers = [
+    "slow: 集成 / 真模型测试，默认跳过（用 QINGQIU_RUN_SLOW=1 开启）",
+]
