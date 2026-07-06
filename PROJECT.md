@@ -1,7 +1,7 @@
 # PROJECT · 清秋项目状态
 
-> **状态：** v0.3.0 · 立项完成 + **M1 ✅ 5/5** + **S2.1 / S5.1 / S5.2 / S5.3 / S2.2 / S2.5 / S6.5 / S5.4 真跑落地**
-> **最后更新：** 2026-07-06 12:14
+> **状态：** v0.3.0 · 立项完成 + **M1 ✅ 5/5** + **v1.0 MVP ✅** + 17 切片全部真跑落地
+> **最后更新：** 2026-07-06 12:51
 > **作者：** Mavis
 > **本文件性质：** 项目"快照"。**状态变化、决策、下一步**都写在这里。每次 session 开始 / 结束时更新。
 
@@ -9,7 +9,7 @@
 
 ## 1. 一句话状态
 
-**清秋 v0.3.0 + 13 切片完成（M1 + S2.1 + S2.2 + S2.5 + S5.1+S5.2+S5.3+S5.4 + S6.1 + S6.5）**。35 切片剩余 / 395/395 测试 PASS / CI Loop 每 30min 自动跑通 / 远端 main `5999fd6`。
+**清秋 v1.0 MVP 可落地第一版交付**。17 切片完成（M1 + S2.1/2.2/2.4/2.5/2.6 + S5.1/2/3/4/5 + S6.1/5）/ 476/476 测试 PASS / 远端 main `139cb47` / CI Loop 每 30min 自动跑通。
 
 ---
 
@@ -19,12 +19,12 @@
 |------|------|
 | **PRD** | v0.2.2 已冻结 |
 | **架构** | v0.3.0 · 五层架构 + 48 切片路径清晰 |
-| **代码** | ~5500 行（src/qingqiu/ 8 模块 + router/ + personality/ + cli 9 文件 + security 4 文件） |
-| **测试** | **395 个 pytest 全通过**（比 day2 +138：S2.2=28, S2.5=11, S6.5=14, S5.4=32） |
-| **文档** | 11 份核心 + 5 份 references/ + **11 份真跑证据** + 3 份 handoff（day1+day2+day3） |
-| **里程碑** | M0 ✅ / **M1 ✅ 5/5** / **M2 3/6**（S2.1+S2.2+S2.5）/ **M5 4/5**（S5.1+S5.2+S5.3+S5.4）/ **M6 2/3**（S6.1+S6.5）/ M3-M4-M7-M10 pending |
-| **当前切片** | ✅ **Day 3 全部完成**（S2.2 + S2.5 + S6.5 + S5.4 merged to main）· CI Loop 已设 |
-| **仓库** | ✅ GitHub：`https://github.com/luo683/qingqiu-system` · main `5999fd6` |
+| **代码** | ~6800 行（src/qingqiu/ 9 模块 + router/ + personality/ + cli 9 文件 + security 5 文件 + sensitive 新增） |
+| **测试** | **476 个 pytest 全通过**（比 day3 +81：S2.4=21, S5.5=39, S2.6 demo=21） |
+| **文档** | 11 份核心 + 5 份 references/ + **13 份真跑证据** + 4 份 handoff（day1-4） |
+| **里程碑** | M0 ✅ / **M1 ✅ 5/5** / **M2 ✅ 5/6**（S2.6 demo）/ **M5 ✅ 5/5**（S5.1-5.5）/ **M6 2/3**（S6.1+S6.5）/ M3-M4-M7-M10 pending |
+| **当前切片** | ✅ **v1.0 MVP 端到端可跑通** · 15 场景 demo + 5 真实 CLI 命令 |
+| **仓库** | ✅ GitHub：`https://github.com/luo683/qingqiu-system` · main `139cb47` |
 | **CI Loop** | ✅ `ci-loop` cron · 每 30min 自动 `uv run pytest tests/` · TTL 14d 到 2026-07-20 |
 
 ---
@@ -59,6 +59,10 @@
 | **S6.5** | 人格 personality.yaml + 热更新（watchdog + 10 测试 + 271/271 真跑 PASS） |
 | **S5.4** | 私密识别 Detect（filename + content + directory + GB 11643-1999 身份证校验位 + 32 测试 + 342/342 真跑 PASS） |
 | **Day 3 收官** | 4 slices merged（S2.2/S2.5/S6.5/S5.4）+ main 395/395 PASS + CI Loop cron 设置 ✅ |
+| **S2.4** | Executor 意图路由（Router → CLI handler + 21 测试 + 7 场景真跑 + 416/416 全量 PASS） |
+| **S5.5** | 私密处理 Block + Redact（脱敏映射 + 39 测试 + 455/455 全量 PASS） |
+| **S2.6** | v1.0 MVP 端到端 Demo（15 场景真跑 + 真实 CLI 入口验证 5/5 + 476/476 PASS） |
+| **Day 4 收官** | v1.0 MVP **可落地第一版交付** · 3 slices merged（S2.4/S5.5/S2.6）+ main 476/476 PASS + demo 跑通 |
 
 ### 3.2 进行中 🔄
 
@@ -112,18 +116,31 @@
 
 ## 5. 下一步（**最重要的章节**）
 
-### 5.1 立即（**Day 3 之后 · 下一刀**）
+### 5.1 立即（**Day 4 之后 · 下一刀**）
 
-**Day 3 已完成**：S2.2 + S2.5 + S6.5 + S5.4 全部 merged to main（`5999fd6`）+ CI Loop 启用。
+**Day 4 已完成（v1.0 MVP 交付）**：
+- ✅ S2.4 Executor 路由（21 测试 + 7 场景真跑 + 416/416 全量）
+- ✅ S5.5 私密处理 Block + Redact（39 测试 + 455/455 全量）
+- ✅ S2.6 v1.0 MVP 端到端 Demo（15 场景 + 真实 CLI 入口 5 命令全过）
+- ✅ main `139cb47` · 476/476 PASS · push origin
+- ✅ CI Loop 跑通首次 tick
 
-**下一步（M2 剩余 + M5 收尾）**：
+**用户原话**："今天就要看到可落地的第一版" → **已交付**。
 
-- [ ] **S5.5** · 敏感字段加密（KDF + AES-GCM + 32 测试 + 真跑 PASS）· M5 最后一块
-- [ ] **S2.3** · Planner 任务拆解（DAG + 依赖图 + 30 测试）· 接 S2.2 Intent
-- [ ] **S2.4** · Executor 任务执行（按 Intent 路由到 coder/reviewer/info/life agent）
-- [ ] **S2.6** · Long-term Scheduler（cron-like 调度器）
-- [ ] CI Loop 自动跑出结果后，排查任何偶发失败
-- [ ] 决定 Day 4 是否继续开切片（看 user 优先级）
+**下一步（v1.1 · 切片）**：
+
+- [ ] **M3 语音入口**（最长切片链）：
+  - [ ] **S3.1** · sounddevice 录音 + Ctrl+Shift+Q 全局热键
+  - [ ] **S3.2** · faster-whisper 集成（中文识别）
+  - [ ] **S3.3** · piper-tts 集成
+  - [ ] **S3.4** · 语音 → CLI 链路（whisper → Executor）
+  - [ ] **S3.5** · TTS 播报整合
+- [ ] **M4 飞书 IM**（最实用入口）：
+  - [ ] **S4.1** · 飞书 WebSocket 客户端
+  - [ ] **S4.2** · 消息 → Router
+  - [ ] **S4.3** · IM 响应回发
+- [ ] **M2 收尾**：S2.3 Planner / chat 多轮对话
+- [ ] **M6 收尾**：L1/L2/L3 记忆接入 + 知识图谱基础
 
 ### 5.2 短期（M1 范围 · 1-2 周）
 
@@ -170,6 +187,9 @@ Obsidian 接入 + 知识图谱 UI + 自我成长 + 持续打磨。
 | D-025 | 2026-07-06 | **S2.2 Router 实施完成**：18 Intent + Rule + LLM fallback | 28 测试 + 10 指令真跑 100%；中文友好用 `(?<![a-zA-Z0-9_])` lookbehind/ahead（不是 `\b`） |
 | D-026 | 2026-07-06 | **CI Loop cron 设置**：用户原话"设置loop反复检查并跑通项目" | `mavis cron self ci-loop --every 30m --ttl 14d`；自动到期 2026-07-20；失败时自动修或 spawn coder |
 | D-027 | 2026-07-06 | **Day 3 合并策略**：S2.2 → S2.5 → S6.5 → S5.4 顺序 | 独立模块无冲突；最终 main `5999fd6`；395/395 PASS |
+| D-028 | 2026-07-06 | **S2.4 Executor 设计**：零业务只路由 | 复用 cli/memory/task/status handler；实体提取用 regex；ask 子命令替换 placeholder |
+| D-029 | 2026-07-06 | **v1.0 MVP 定义**：router+executor+CLI 子命令端到端跑通 | 15 场景 demo + 5 真实 CLI 命令 + 476/476 pytest PASS = 可落地第一版 |
+| D-030 | 2026-07-06 | **CI Loop 启用**：cron self ci-loop | 首次 tick 416/416 PASS；每 30min 自动跑；失败时自动修或 spawn coder |
 
 ---
 
