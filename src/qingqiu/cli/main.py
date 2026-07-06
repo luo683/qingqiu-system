@@ -25,6 +25,7 @@ from qingqiu.cli.output import OutputFormatter
 from qingqiu.cli.status import build_parser as build_status_parser
 from qingqiu.cli.task import build_parser as build_task_parser
 from qingqiu.observability import get_logger, setup_logging
+from qingqiu.router.executor import run_ask
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -69,9 +70,21 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", metavar="<subcommand>")
 
     # === M2 占位子命令（仅 help 完整 + 友好错误） ===
-    p_ask = subparsers.add_parser("ask", help="单次提问（占位：M2.2 router 接入）")
-    p_ask.add_argument("prompt", nargs="+", help="提问内容")
-    p_ask.set_defaults(_handler=lambda args, out: _placeholder_ask(args, out))
+    p_ask = subparsers.add_parser(
+        "ask",
+        help="自然语言入口：识别意图并执行（S2.4 router 接入）",
+        description=(
+            "自然语言入口。例：\n"
+            "  qingqiu ask 'memory get user_name'\n"
+            "  qingqiu ask 'memory set user_name ROG'\n"
+            "  qingqiu ask 'task add 写文档'\n"
+            "  qingqiu ask '看任务'\n"
+            "  qingqiu ask 'status'"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p_ask.add_argument("prompt", nargs="+", help="自然语言指令")
+    p_ask.set_defaults(_handler=_handle_ask)
 
     p_chat = subparsers.add_parser("chat", help="交互模式（占位：M2.6 端到端）")
     p_chat.set_defaults(_handler=lambda args, out: _placeholder_chat(args, out))
@@ -97,12 +110,11 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-# === 占位 handlers（M2 后续切片实现） ===
+# === ask handler（S2.4 router 接入） ===
 
-def _placeholder_ask(args, out: OutputFormatter) -> int:
-    out.info("ask 子命令尚未实现（S2.2 router 接入后启用）")
-    out.print({"prompt": " ".join(args.prompt), "status": "placeholder"})
-    return 0
+def _handle_ask(args, out: OutputFormatter) -> int:
+    """`qingqiu ask "<natural language>"` — 路由到 Executor"""
+    return run_ask(args, out, llm_provider=None)
 
 
 def _placeholder_chat(args, out: OutputFormatter) -> int:

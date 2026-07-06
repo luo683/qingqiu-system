@@ -37,8 +37,9 @@ class RuleBasedClassifier:
     E = r"(?![a-zA-Z0-9_])"     # 右边界：后一个字符不是 word
 
     RULES: list[tuple[str, Intent, str]] = [
-        # task 命令
-        (rf"{B}(add|新建|创建|加|记一下|提醒我){E}.*?{B}(task|任务|待办|todo){E}", Intent.TASK_ADD, "task_add_keyword"),
+        # task 命令（两种顺序都支持：add→task / task→add）
+        (rf"{B}(add|新建|创建|加|记一下|提醒我){E}.*?{B}(task|任务|待办|todo){E}", Intent.TASK_ADD, "task_add_zhfirst"),
+        (rf"{B}(task|任务){E}.*?{B}(add|新建|创建|加){E}", Intent.TASK_ADD, "task_add_engfirst"),
         # task_list: 两种顺序都支持（"task list" / "看任务"）
         (rf"{B}(task|任务){E}.*?{B}(list|列表){E}", Intent.TASK_LIST, "task_list_eng"),
         (rf"{B}(看|显示|有什么|查){E}.*?{B}(task|任务){E}", Intent.TASK_LIST, "task_list_zh"),
