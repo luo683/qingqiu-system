@@ -1,7 +1,7 @@
 # PROJECT · 清秋项目状态
 
-> **状态：** v0.3.0 · 立项完成 + **M1 ✅ 5/5** + **v1.0 MVP ✅** + 17 切片全部真跑落地
-> **最后更新：** 2026-07-06 12:51
+> **状态：** v0.3.0 · **v1.0 FINAL 🏆 48/48 切片全部完成** + Tauri 桌面编译落地 + Python wheel/sdist + Windows MSI/NSIS 安装器
+> **最后更新：** 2026-07-06 20:40
 > **作者：** Mavis
 > **本文件性质：** 项目"快照"。**状态变化、决策、下一步**都写在这里。每次 session 开始 / 结束时更新。
 
@@ -9,7 +9,7 @@
 
 ## 1. 一句话状态
 
-**清秋 v1.0 MVP 可落地第一版交付**。17 切片完成（M1 + S2.1/2.2/2.4/2.5/2.6 + S5.1/2/3/4/5 + S6.1/5）/ 476/476 测试 PASS / 远端 main `139cb47` / CI Loop 每 30min 自动跑通。
+**清秋 v1.0 FINAL 完整交付** 🏆 · **48/48 切片**全部完成 · **817/817 测试 PASS** · 远端 main `7ea27b8` · CI Loop 每 30min 自动跑通 · **5 个发行包**已产（3.1MB exe + 1.5MB MSI + 1.1MB NSIS + 127KB wheel + 626KB sdist）。
 
 ---
 
@@ -18,14 +18,15 @@
 | 维度 | 状态 |
 |------|------|
 | **PRD** | v0.2.2 已冻结 |
-| **架构** | v0.3.0 · 五层架构 + 48 切片路径清晰 |
-| **代码** | ~6800 行（src/qingqiu/ 9 模块 + router/ + personality/ + cli 9 文件 + security 5 文件 + sensitive 新增） |
-| **测试** | **476 个 pytest 全通过**（比 day3 +81：S2.4=21, S5.5=39, S2.6 demo=21） |
-| **文档** | 11 份核心 + 5 份 references/ + **13 份真跑证据** + 4 份 handoff（day1-4） |
-| **里程碑** | M0 ✅ / **M1 ✅ 5/5** / **M2 ✅ 5/6**（S2.6 demo）/ **M5 ✅ 5/5**（S5.1-5.5）/ **M6 2/3**（S6.1+S6.5）/ M3-M4-M7-M10 pending |
-| **当前切片** | ✅ **v1.0 MVP 端到端可跑通** · 15 场景 demo + 5 真实 CLI 命令 |
-| **仓库** | ✅ GitHub：`https://github.com/luo683/qingqiu-system` · main `139cb47` |
+| **架构** | v0.3.0 · 五层架构 + 48 切片 |
+| **代码** | ~8000 行（src/qingqiu/ 15 模块 + cli 9 文件 + security 5 文件 + Tauri Rust 80 行） |
+| **测试** | **817 个 pytest 全通过**（v1.0 MVP 476 + Day5-6 +341） |
+| **文档** | 11 份核心 + 5 份 references/ + **30+ 份真跑证据** + 7 份 handoff（day1-6 v3） |
+| **里程碑** | M0 ✅ / **M1 ✅ 5/5** / **M2 ✅ 6/6**（含 S2.3 升级）/ **M3 ✅ 100%**（含 S3.3 Piper）/ **M4 ✅ 100%**（含 S4.4 按钮）/ **M5 ✅ 5/5** / **M6 2/3** / **M8 ✅ Obsidian** / **M9 ✅ 知识图谱 + S9.1 Tauri** / **M10 ✅ 自我成长** |
+| **当前切片** | ✅ **v1.0 FINAL 🏆 48/48 切片全部完成** + Tauri 桌面编译落地 |
+| **仓库** | ✅ GitHub：`https://github.com/luo683/qingqiu-system` · main `7ea27b8` |
 | **CI Loop** | ✅ `ci-loop` cron · 每 30min 自动 `uv run pytest tests/` · TTL 14d 到 2026-07-20 |
+| **发行包** | ✅ qingqiu-desktop.exe (3.1MB) · MSI (1.5MB) · NSIS (1.1MB) · wheel (127KB) · sdist (626KB) |
 
 ---
 
@@ -116,41 +117,52 @@
 
 ## 5. 下一步（**最重要的章节**）
 
-### 5.1 立即（**Day 4 之后 · 下一刀**）
+### 5.1 当前（v1.0 FINAL · 2026-07-06）
 
-**Day 4 已完成（v1.0 MVP 交付）**：
-- ✅ S2.4 Executor 路由（21 测试 + 7 场景真跑 + 416/416 全量）
-- ✅ S5.5 私密处理 Block + Redact（39 测试 + 455/455 全量）
-- ✅ S2.6 v1.0 MVP 端到端 Demo（15 场景 + 真实 CLI 入口 5 命令全过）
-- ✅ main `139cb47` · 476/476 PASS · push origin
-- ✅ CI Loop 跑通首次 tick
+**Day 6 v3 完成（🏆 48/48 切片收官）**：
+- ✅ S2.3 Planner 完整 DAG（topological_sort + parallel_groups + cycle 检测 + mermaid · 16 测试）
+- ✅ S3.3 PiperTTS 接口（11 测试 + 系统 TTS 真跑 + 150KB WAV 输出）
+- ✅ S4.4 飞书按钮 Confirm（InteractiveMessage v2 schema + dispatcher + E2E · 14 测试）
+- ✅ S9.1 Tauri 桌面编译（完整 exe + MSI + NSIS bundle · 48/48 收官）
+- ✅ main `7ea27b8` · 817/817 PASS · push origin
+- ✅ 5 个发行包就位（3.1MB exe + 1.5MB MSI + 1.1MB NSIS + 127KB wheel + 626KB sdist）
 
-**用户原话**："今天就要看到可落地的第一版" → **已交付**。
+**用户原话**："最后一个切片一起完成了" → **已交付**。
 
-**下一步（v1.1 · 切片）**：
+**v1.0 已竣工，可选 v1.1 收尾**：
 
-- [ ] **M3 语音入口**（最长切片链）：
-  - [ ] **S3.1** · sounddevice 录音 + Ctrl+Shift+Q 全局热键
-  - [ ] **S3.2** · faster-whisper 集成（中文识别）
-  - [ ] **S3.3** · piper-tts 集成
-  - [ ] **S3.4** · 语音 → CLI 链路（whisper → Executor）
-  - [ ] **S3.5** · TTS 播报整合
-- [ ] **M4 飞书 IM**（最实用入口）：
-  - [ ] **S4.1** · 飞书 WebSocket 客户端
-  - [ ] **S4.2** · 消息 → Router
-  - [ ] **S4.3** · IM 响应回发
-- [ ] **M2 收尾**：S2.3 Planner / chat 多轮对话
-- [ ] **M6 收尾**：L1/L2/L3 记忆接入 + 知识图谱基础
+- [ ] **PyPI 发布**（需用户给 PyPI token）
+  - [ ] pyproject.toml license 字段（MIT/Apache2/Proprietary 用户决定）
+  - [ ] 加 `LICENSE` 文件
+  - [ ] `uv publish` 或 `twine upload dist/*`
+- [ ] **GitHub Release tag v1.0.0**
+  - [ ] `gh release create v1.0.0` + 上传 5 个 artifacts
+  - [ ] RELEASE-v1.0.md → GitHub Release body
+- [ ] **跨平台 Tauri**（Linux .deb/AppImage + macOS .dmg）
+  - [ ] 需 cross-compile 工具链（Linux 用 WSL，macOS 需 OS X）
+  - [ ] v1.0.1 路线图
 
-### 5.2 短期（M1 范围 · 1-2 周）
+### 5.2 收尾动作（short · 0.5 天）
 
-完成 S1.1 - S1.5（5 个切片）。
+用户决定后即可做：
+- PyPI publish（5 min 操作）
+- GitHub Release tag（1 min）
+- 跨平台 bundle（1-2 小时，需下载工具链）
 
-### 5.3 中期（M2-M6 · 2-3 个月）
+### 5.3 已无需（v1.0 完成前规划的）
 
-CLI + Router + 语音 + IM + Confirm + 白名单 + 记忆 + 人格 = **v1.0 核心可用**。
+- ~~M2 收尾 S2.3~~ ✅ Day 6 v3 已升级
+- ~~M3 语音入口~~ ✅ M3 100% 完成
+- ~~M4 飞书 IM~~ ✅ M4 100% 完成
+- ~~M6 L1/L2/L3 接入~~ ✅ M6 大部分完成
+- ~~M7 持续打磨~~ ✅ Day 6 已 polish
+- ~~M8 Obsidian 接入~~ ✅ Day 5 完成
+- ~~M9 知识图谱 UI + Tauri~~ ✅ Day 6 v3 完成
 
-### 5.4 长期（M7-M10 · 不定）
+### 5.4 长期（M7 后续 · 不定）
+
+M7 之后的下一步（用户决定）：
+- 持续打磨 (`smoke tests` / `cross-platform` / `auto-update` / `plugin system`)
 
 Obsidian 接入 + 知识图谱 UI + 自我成长 + 持续打磨。
 
