@@ -218,6 +218,35 @@ $E:\MiniMax Code Work Space\qingqiu-system\personality.yaml   # 项目级
 
 ---
 
+## ⚠️ M2.6 + M3 + M4 没接入主 CLI (caveat)
+
+`qingqiu` CLI 实装的子命令只有：`ask / chat / task / memory / status / confirm / config / llm`。
+**没有** `web / im / voice / say` 子命令 — 是 by design（M2.6 主脑没接入 CLI 面）。
+
+启动这些模块用独立入口：
+
+```powershell
+# M9 知识图谱 web UI
+cd "E:\MiniMax Code Work Space\qingqiu-system"
+uvicorn qingqiu.ui.server:app --host 0.0.0.0 --port 7788
+# → 浏览器开 http://127.0.0.1:7788
+
+# M3 语音 pipeline（录音 + STT + 执行）
+uv run python -m qingqiu.voice.pipeline
+
+# M4 飞书 IM（需 FEISHU_APP_ID/SECRET 或自动 mock）
+$env:FEISHU_APP_ID = "cli_xxx"
+$env:FEISHU_APP_SECRET = "xxx"
+uv run python -m qingqiu.im.feishu.client
+
+# TTS 直接发（用系统 SAPI — Windows / macOS say / Linux espeak）
+uv run python -c "from qingqiu.voice.tts import speak; speak('你好清秋')"
+```
+
+Tauri 桌面启动时 webview 自动连 `127.0.0.1:7788`，所以**先用 uvicorn 起 daemon 再开桌面**。
+
+---
+
 ## 📞 故障排查
 
 | 问题 | 排查 |
