@@ -9,6 +9,7 @@ keywords = ["ai", "assistant", "voice", "obsidian", "local-first", "hermes"]
 
 # S1.2 起加 LLM provider 依赖（S1.2 范围）
 # S1.3 起加 YAML / pydantic 配置支持
+# M9 起加 FastAPI / uvicorn（知识图谱 UI HTTP server）
 dependencies = [
     "openai>=1.0",
     "anthropic>=0.30",
@@ -18,6 +19,8 @@ dependencies = [
     "pydantic>=2.0",
     "PyYAML>=6.0",
     "loguru>=0.7.3",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
 ]
 
 [project.scripts]
